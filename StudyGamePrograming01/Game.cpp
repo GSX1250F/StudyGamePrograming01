@@ -16,7 +16,7 @@ Game::Game()
 	, mRenderer(nullptr)
 	, mTicksCount(0)
 	, mIsRunning(true)
-	, mPaddleDir(0)
+	
 {	
 
 }
@@ -78,7 +78,7 @@ bool Game::Initialize()
 		return false;
 	}
 
-	//
+	//パドル、ボールの位置・速さ・方向を初期化
 	mPaddlePos.x = 10.0f;
 	mPaddlePos.y = 768.0f / 2.0f;
 	mBallPos.x = 1024.0f / 2.0f;
@@ -216,12 +216,12 @@ void Game::UpdateGame()
 
 void Game::GenerateOutput()
 {
-	// Set draw color to blue
+	// Set draw color of walls
 	SDL_SetRenderDrawColor(
 		mRenderer,
-		0,		// R
-		0,		// G 
-		255,	// B
+		50,		// R
+		50,		// G 
+		50,		// B
 		255		// A
 	);
 
@@ -229,20 +229,21 @@ void Game::GenerateOutput()
 	SDL_RenderClear(mRenderer);
 
 	// Draw walls
-	SDL_SetRenderDrawColor(mRenderer, 255, 255, 255, 255);
+	SDL_SetRenderDrawColor(mRenderer, 200, 200, 200, 255);
 
 	// Draw top wall
+	// SDL_Rect : 長方形を作成
 	SDL_Rect wall{
 		0,			// Top left x
 		0,			// Top left y
 		1024,		// Width
 		thickness	// Height
 	};
-	SDL_RenderFillRect(mRenderer, &wall);
+	SDL_RenderFillRect(mRenderer, &wall);	//作成した長方形を描画（塗りつぶし）
 
 	// Draw bottom wall
-	wall.y = 768 - thickness;
-	SDL_RenderFillRect(mRenderer, &wall);
+	wall.y = 768 - thickness;		
+	SDL_RenderFillRect(mRenderer, &wall);	//作成した長方形を描画（塗りつぶし）	
 
 	// Draw right wall
 	wall.x = 1024 - thickness;
@@ -258,6 +259,13 @@ void Game::GenerateOutput()
 		thickness,
 		static_cast<int>(paddleH)
 	};
+	SDL_SetRenderDrawColor(
+		mRenderer,
+		0,		// R
+		0,		// G 
+		200,		// B
+		255		// A
+	);
 	SDL_RenderFillRect(mRenderer, &paddle);
 
 	// Draw ball
@@ -267,6 +275,13 @@ void Game::GenerateOutput()
 		thickness,
 		thickness
 	};
+	SDL_SetRenderDrawColor(
+		mRenderer,
+		200,		// R
+		0,		// G 
+		0,		// B
+		255		// A
+	);
 	SDL_RenderFillRect(mRenderer, &ball);
 
 	// Swap front buffer and back buffer

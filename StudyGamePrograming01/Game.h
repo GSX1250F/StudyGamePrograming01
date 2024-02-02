@@ -52,10 +52,13 @@ private:
 
 	// Pong specific
 	// Direction of paddle
-	std::vector<int> mPaddleDir;
+	int mPaddleDir;
 	// Position of paddle
-	std::vector<Vector2> mPaddlePos;
-	// Ball
-	std::vector<Ball> mBalls;
+	Vector2 mPaddlePos;
+	// Position of Ball
+	Vector2 mBallPos;
+	// Velocity of Ball
+	Vector2 mBallVel;
+
 	
 };
