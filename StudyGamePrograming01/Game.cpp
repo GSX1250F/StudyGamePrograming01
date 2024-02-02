@@ -17,14 +17,18 @@ Game::Game()
 	, mTicksCount(0)
 	, mIsRunning(true)
 	, mPaddleDir(0)
-{
+{	
 
 }
 
 bool Game::Initialize()
 {
 	// Initialize SDL
-	int sdlResult = SDL_Init(SDL_INIT_VIDEO);
+	int sdlResult = SDL_Init(SDL_INIT_VIDEO);	//ビデオサブシステムの初期化。返り値は整数。返り値が0でないときは初期化失敗
+	// SDL_INIT_AUDIO	:	オーディオデバイスの管理、再生、録音
+	// SDL_INIT_HAPTIC	:	フォースフィードバック（振動など）のサブシステム
+	// SDL_INIT_GAMECONTROLLER	:	コントローラ入力デバイスのサブシステム
+
 	if (sdlResult != 0)
 	{
 		SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
@@ -40,6 +44,10 @@ bool Game::Initialize()
 		768,	// Height of window
 		0		// Flags (0 for no flags set)
 	);
+	// SDL_WINDOW_FULLSCREEN : フルスクリーンモード使用
+	// SDL_WINDOW_FULSCREEN_DESKTOP : 現在のデスクトップの解像度でフルスクリーンモードを使用
+	// SDL_WINDOW_OPENGL : OpenGLグラフィックスライブラリを使用
+	// SDL_WINDOW_RESIZABLE : ユーザーがウィンドウの大きさを変えられる。
 
 	if (!mWindow)
 	{
@@ -48,6 +56,15 @@ bool Game::Initialize()
 	}
 
 	//// Create SDL renderer
+	// ラスターグラフィックス：ディスプレイはピクセルの2次元格子で構成されている。
+	// カラーバッファという2次元配列に画面全体の色情報が置かれる。
+	// ※フレームバッファはカラーバッファ・デプスバッファ・ステンシルバッファなどの組合せの総称。
+
+	// ダブルバッファ技術
+	// カラーバッファを２つ用意する。ゲームは１つのバッファに書き込み、ディスプレイはもう１つのバッファを表示する。
+	// ディスプレイが表示を終えると、２つのバッファは交換される。
+	// ディスプレイが表示を終えて、バッファが交換されるサイクルを　vsync（垂直同期）　という。
+	// 2Dグラフィックス描画用の関数群を　SDL_Renderer　で利用する。
 	mRenderer = SDL_CreateRenderer(
 		mWindow, // Window to create renderer for
 		-1,		 // Usually -1
@@ -56,9 +73,11 @@ bool Game::Initialize()
 
 	if (!mRenderer)
 	{
+		//レンダラーの初期化に失敗したとき
 		SDL_Log("Failed to create renderer: %s", SDL_GetError());
 		return false;
 	}
+
 	//
 	mPaddlePos.x = 10.0f;
 	mPaddlePos.y = 768.0f / 2.0f;
@@ -66,7 +85,7 @@ bool Game::Initialize()
 	mBallPos.y = 768.0f / 2.0f;
 	mBallVel.x = -200.0f;
 	mBallVel.y = 235.0f;
-	return true;
+	return true;	//初期化完了でtrueを返す。
 }
 
 void Game::RunLoop()
@@ -80,15 +99,17 @@ void Game::RunLoop()
 }
 
 void Game::ProcessInput()
-{
+{	// SDLのイベントを内部のキューで管理する。
+	// イベントキューでは、1フレームに複数のイベントが入っている可能性があるので、
+	// キューにあるすべてのイベントをループ処理する必要がある。
 	SDL_Event event;
-	while (SDL_PollEvent(&event))
+	while (SDL_PollEvent(&event))		// SDLキューにイベントがあればtrue
 	{
 		switch (event.type)
 		{
 			// If we get an SDL_QUIT event, end loop
-		case SDL_QUIT:
-			mIsRunning = false;
+		case SDL_QUIT:		// ユーザーがウィンドウを閉じようとした入力のイベント
+			mIsRunning = false;		//ゲームを終了するフラグ
 			break;
 		}
 	}
@@ -96,9 +117,9 @@ void Game::ProcessInput()
 	// Get state of keyboard
 	const Uint8* state = SDL_GetKeyboardState(NULL);
 	// If escape is pressed, also end loop
-	if (state[SDL_SCANCODE_ESCAPE])
+	if (state[SDL_SCANCODE_ESCAPE])		//ESCキーが押されたとき
 	{
-		mIsRunning = false;
+		mIsRunning = false;		//ゲームを終了するフラグ
 	}
 
 	// Update paddle direction based on W/S keys
@@ -115,6 +136,9 @@ void Game::ProcessInput()
 
 void Game::UpdateGame()
 {
+	
+
+
 	// Wait until 16ms has elapsed since last frame
 	while (!SDL_TICKS_PASSED(SDL_GetTicks(), mTicksCount + 16))
 		;
@@ -251,7 +275,7 @@ void Game::GenerateOutput()
 
 void Game::Shutdown()
 {
-	SDL_DestroyRenderer(mRenderer);
-	SDL_DestroyWindow(mWindow);
-	SDL_Quit();
+	SDL_DestroyRenderer(mRenderer);	// SDL_Rendererを破棄
+	SDL_DestroyWindow(mWindow);		// SDL_Windowを破棄
+	SDL_Quit();						// SDL終了
 }

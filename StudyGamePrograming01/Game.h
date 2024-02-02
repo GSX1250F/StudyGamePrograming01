@@ -14,8 +14,11 @@
 
 // Vector2 struct just stores x/y coordinates
 // (for now)
+// structはデフォルトのアクセシビリティが public
+// classはデフォルトのアクセシビリティが private
 struct Vector2
 {
+// public: ←structだからあっても無くても動作は同じ。
 	float x;
 	float y;
 };
@@ -24,18 +27,19 @@ struct Vector2
 class Game
 {
 public:
-	Game();
+	// コンストラクタ
 	// Initialize the game
-	bool Initialize();
+	Game();
 	// Runs the game loop until the game is over
+	bool Initialize();
 	void RunLoop();
 	// Shutdown the game
 	void Shutdown();
 private:
 	// Helper functions for the game loop
-	void ProcessInput();
-	void UpdateGame();
-	void GenerateOutput();
+	void ProcessInput();	// 1.入力を受け付ける
+	void UpdateGame();		// 2.ゲームを処理する
+	void GenerateOutput();	// 3.更新
 
 	// Window created by SDL
 	SDL_Window* mWindow;
@@ -48,11 +52,10 @@ private:
 
 	// Pong specific
 	// Direction of paddle
-	int mPaddleDir;
+	std::vector<int> mPaddleDir;
 	// Position of paddle
-	Vector2 mPaddlePos;
-	// Position of ball
-	Vector2 mBallPos;
-	// Velocity of ball
-	Vector2 mBallVel;
+	std::vector<Vector2> mPaddlePos;
+	// Ball
+	std::vector<Ball> mBalls;
+	
 };
