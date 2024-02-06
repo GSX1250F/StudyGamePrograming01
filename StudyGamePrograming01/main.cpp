@@ -6,7 +6,7 @@
 // See LICENSE in root directory for full details.
 // ----------------------------------------------------------------
 
-#include "Game.h"
+#include "Game2player.h"
 
 int main(int argc, char** argv)
 {

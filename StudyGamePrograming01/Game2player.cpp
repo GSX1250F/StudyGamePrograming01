@@ -1,25 +1,15 @@
-/*
-/ ----------------------------------------------------------------
-// From Game Programming in C++ by Sanjay Madhav
-// Copyright (C) 2017 Sanjay Madhav. All rights reserved.
-// 
-// Released under the BSD License
-// See LICENSE in root directory for full details.
-// ----------------------------------------------------------------
-
-#include "Game.h"
+#include "Game2player.h"
+// 課題1.1　２人のプレイヤーバージョン
 
 const int thickness = 15;
 const float paddleH = 100.0f;
 
 Game::Game()
-	:mWindow(nullptr)
-	, mRenderer(nullptr)
-	, mTicksCount(0)
-	, mIsRunning(true)
-	
-{	
-
+{
+	mWindow = nullptr;
+	mRenderer = nullptr;
+	mTicksCount = 0;
+	mIsRunning = true;
 }
 
 bool Game::Initialize()
@@ -79,13 +69,20 @@ bool Game::Initialize()
 		return false;
 	}
 
-	//パドル、ボールの位置・速さ・方向を初期化
-	mPaddlePos.x = 10.0f;
-	mPaddlePos.y = 768.0f / 2.0f;
-	mBallPos.x = 1024.0f / 2.0f;
-	mBallPos.y = 768.0f / 2.0f;
-	mBallVel.x = -200.0f;
-	mBallVel.y = 235.0f;
+	//ボールの位置・速さ・方向を初期化
+	Ball ball1_init = { {1024.0f / 2.0f , 768.0f / 3.0f } , { -200.0f , 235.0f} };	//ボール1の初期情報
+	Ball ball2_init = { {1024.0f / 2.0f , 768.0f * 2.0f / 3.0f } , { 200.0f , 235.0f} };	//ボール2の初期情報
+	//mBalls配列にボール1,2のVector2配列をpush backで追加
+	mBalls.push_back(ball1_init);
+	mBalls.push_back(ball2_init);
+	
+	//パドルの位置・方向を初期化
+	mPaddlesPos.push_back({ 10.0f , 768.0f / 2.0f });	//パドル1の初期位置
+	mPaddlesPos.push_back({ 1000.0f , 768.0f / 2.0f });	//パドル2の初期位置
+	mPaddlesDir.push_back(0);	//パドル1の初期方向
+	mPaddlesDir.push_back(0);	//パドル2の初期方向
+	
+	
 	return true;	//初期化完了でtrueを返す。
 }
 
@@ -123,15 +120,26 @@ void Game::ProcessInput()
 		mIsRunning = false;		//ゲームを終了するフラグ
 	}
 
-	// Update paddle direction based on W/S keys
-	mPaddleDir = 0;
-	if (state[SDL_SCANCODE_W])
+	// パドル1の方向
+	mPaddlesDir[0] = 0;
+	if (state[SDL_SCANCODE_Q])		//　Qキーで上方向
 	{
-		mPaddleDir -= 1;
+		mPaddlesDir[0] -= 1;
 	}
-	if (state[SDL_SCANCODE_S])
+	if (state[SDL_SCANCODE_A])		//　Aキーで下方向
 	{
-		mPaddleDir += 1;
+		mPaddlesDir[0] += 1;
+	}
+
+	// パドル2の方向
+	mPaddlesDir[1] = 0;
+	if (state[SDL_SCANCODE_UP])		//　↑キーで上方向
+	{
+		mPaddlesDir[1] -= 1;
+	}
+	if (state[SDL_SCANCODE_DOWN])		//　↓キーで上方向
+	{
+		mPaddlesDir[1] += 1;
 	}
 }
 
@@ -173,6 +181,22 @@ void Game::UpdateGame()
 		}
 	}
 
+	// Update paddle2 position based on direction
+	if (mPaddle2Dir != 0)
+	{
+		mPaddle2Pos.y += mPaddle2Dir * 300.0f * deltaTime;	//パドルのY座標を、300ピクセル/秒だけ増減
+		// Make sure paddle doesn't move off screen!
+		if (mPaddle2Pos.y < (paddleH / 2.0f + thickness))
+		{
+			mPaddle2Pos.y = paddleH / 2.0f + thickness;
+		}
+		else if (mPaddle2Pos.y > (768.0f - paddleH / 2.0f - thickness))
+		{
+			mPaddle2Pos.y = 768.0f - paddleH / 2.0f - thickness;
+		}
+	}
+
+
 	// ボール位置の更新
 	// Update ball position based on ball velocity
 	mBallPos.x += mBallVel.x * deltaTime;
@@ -193,16 +217,18 @@ void Game::UpdateGame()
 	{
 		mBallVel.x *= -1.0f;
 	}
+
 	// Did the ball go off the screen? (if so, end game)
-	else if (mBallPos.x <= 0.0f)
+	if (mBallPos.x <= 0.0f || mBallPos.x >= 1024.0f)
 	{
 		mIsRunning = false;
 	}
+	//
 	// Did the ball collide with the right wall?
-	else if (mBallPos.x >= (1024.0f - thickness) && mBallVel.x > 0.0f)
-	{
-		mBallVel.x *= -1.0f;
-	}
+	//else if (mBallPos.x >= (1024.0f - thickness) && mBallVel.x > 0.0f)
+	//{
+	//	mBallVel.x *= -1.0f;
+	//}
 
 	// Did the ball collide with the top wall?
 	if (mBallPos.y <= thickness && mBallVel.y < 0.0f)
@@ -215,6 +241,24 @@ void Game::UpdateGame()
 	{
 		mBallVel.y *= -1;
 	}
+
+	// 2プレイヤーでの玉の跳ね返り
+	// Did we intersect with the paddle2?
+	float diff2 = mPaddle2Pos.y - mBallPos.y;
+	// Take absolute value of difference
+	diff2 = (diff2 > 0.0f) ? diff2 : -diff2;
+	if (
+		// Our y-difference is small enough
+		diff2 <= paddleH / 2.0f &&
+		// We are in the correct x-position
+		mBallPos.x >= ( 1024.0f - 25.0f ) && mBallPos.x <= ( 1024.0f - 20.0f ) &&
+		// The ball is moving to the right
+		mBallVel.x > 0.0f)
+	{
+		mBallVel.x *= -1.0f;
+	}
+
+	
 }
 
 void Game::GenerateOutput()
@@ -222,17 +266,17 @@ void Game::GenerateOutput()
 	//背景の色を設定
 	SDL_SetRenderDrawColor(
 		mRenderer,
-		50,		// R
-		50,		// G 
-		50,		// B
-		255		// A
+		150,		// R
+		150,		// G 
+		150,		// B
+		255			// A
 	);
 	// 背景を単色でクリア
 	SDL_RenderClear(mRenderer);
 
 	// 壁の描画
 	// 壁の色を設定
-	SDL_SetRenderDrawColor(mRenderer, 200, 200, 200, 255);
+	SDL_SetRenderDrawColor(mRenderer, 220, 220, 0, 255);
 	// 上側の壁を描画
 	// SDL_Rect : 長方形を作成
 	SDL_Rect wall{
@@ -243,14 +287,14 @@ void Game::GenerateOutput()
 	};
 	SDL_RenderFillRect(mRenderer, &wall);	//作成した長方形を描画（塗りつぶし）
 	// 下側の壁を描画
-	wall.y = 768 - thickness;		
+	wall.y = 768 - thickness;
 	SDL_RenderFillRect(mRenderer, &wall);	//作成した長方形を描画（塗りつぶし）	
-	// 右側の壁を描画
-	wall.x = 1024 - thickness;
-	wall.y = 0;
-	wall.w = thickness;
-	wall.h = 1024;
-	SDL_RenderFillRect(mRenderer, &wall);
+	// 右側の壁を描画　※2人プレイヤーでは不要
+	//wall.x = 1024 - thickness;
+	//wall.y = 0;
+	//wall.w = thickness;
+	//wall.h = 1024;
+	//SDL_RenderFillRect(mRenderer, &wall);
 
 
 	// パドルを描画
@@ -270,6 +314,24 @@ void Game::GenerateOutput()
 		255		// A
 	);
 	SDL_RenderFillRect(mRenderer, &paddle);
+
+	// パドル2を描画
+	SDL_Rect paddle2{
+		// static_cast演算子は、floatからintに変換する
+		static_cast<int>(mPaddle2Pos.x),
+		static_cast<int>(mPaddle2Pos.y - paddleH / 2),
+		thickness,
+		static_cast<int>(paddleH)
+	};
+	//パドルの色を設定
+	SDL_SetRenderDrawColor(
+		mRenderer,
+		0,		// R
+		200,		// G 
+		0,		// B
+		255		// A
+	);
+	SDL_RenderFillRect(mRenderer, &paddle2);
 
 	// ボールの描画
 	SDL_Rect ball{
@@ -299,4 +361,3 @@ void Game::Shutdown()
 	SDL_DestroyWindow(mWindow);		// SDL_Windowを破棄
 	SDL_Quit();						// SDL終了
 }
-*/

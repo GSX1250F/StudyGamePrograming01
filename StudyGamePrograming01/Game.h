@@ -1,4 +1,5 @@
-// ----------------------------------------------------------------
+/*
+/ ----------------------------------------------------------------
 // From Game Programming in C++ by Sanjay Madhav
 // Copyright (C) 2017 Sanjay Madhav. All rights reserved.
 // 
@@ -18,7 +19,7 @@
 // classはデフォルトのアクセシビリティが private
 struct Vector2
 {
-// public: ←structだからあっても無くても動作は同じ。
+public: //←structだからあっても無くても動作は同じ。
 	float x;
 	float y;
 };
@@ -61,4 +62,5 @@ private:
 	Vector2 mBallVel;
 
 	
-};
+};z
+*/
