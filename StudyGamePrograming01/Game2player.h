@@ -9,6 +9,8 @@
 // std::vector<int>型でパドルの方向の配列を作る。 { パドル0の方向 , パドル1の方向 }
 // std::vector<Vector2>型でパドルの位置の配列を作る。{ { パドル0.x , パドル0.y } , { パドル1.x , パドル1.y }  }
 
+//プレイヤー数を選択制にする場合、タイトル画面とプレイ画面を構築。
+// scene変数を用意し、0のときはタイトル、1のときはプレイ画面とする。
 
 
 #pragma once
@@ -62,11 +64,17 @@ private:
 	bool mIsRunning;
 
 	// Pong specific
-	std::vector<int> mPaddlesDir;	//パドルの方向配列。パドル1とパドル2の方向をもつ
-	std::vector<Vector2> mPaddlesPos;	//パドルの位置のVector2型配列。パドル1のx,y とパドル2のx,y
+	std::vector<int> mPaddlesDir;	//パドルの方向配列。パドル0とパドル1の方向をもつ
+	std::vector<Vector2> mPaddlesPos;	//パドルの位置のVector2型配列。パドル0のx,y とパドル1のx,y
 	std::vector<Ball> mBalls;		//ボール型の配列。ボールの位置x,yと速度x,y
-	static const int mBallNum = 2;	//ボールの数。※今後、改造で選択可能にする。
+	int mBallsNum;	//ボールの数
+	int mPaddlesNum;	//パドルの数
+	float paddleH;	//パドルの長さ
+	float thickness;	//壁・玉・パドルの厚み
+	float mBallsAcc;	//ボールの加速度
 
+	// タイトル画面かプレイ画面かの変数
+	int scene;
 
 	//メモ　ボールをBall構造体にするなら、パドルもPaddle構造体にした方がいい？
 	// struct Paddle { int dir , Vector2　pos } として、 std::vector<Paddle> mPaddles　とする。

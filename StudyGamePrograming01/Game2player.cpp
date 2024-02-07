@@ -1,8 +1,17 @@
 #include "Game2player.h"
-// 課題1.1　２人のプレイヤーバージョン
+#include <iostream>
+#include <random>
+#include <math.h>
 
-const int thickness = 15;
-const float paddleH = 100.0f;
+using namespace std;
+// 課題1.1　２人のプレイヤーバージョン
+// 課題1.2　２人＆２ボールのバージョン
+// 課題1.3　プレイヤー数を選択制にする
+// 課題1.4　ボール数を選択制にする
+// 課題1.5　ボールの初期方向をランダムにする。
+// 課題1.6　ボールがパドルでバウンドする毎に、スピードが少しずつ速くなる。（難易度少しずつアップ）
+// 課題1.7　ボール2つ以上も可能
+
 
 Game::Game()
 {
@@ -10,7 +19,37 @@ Game::Game()
 	mRenderer = nullptr;
 	mTicksCount = 0;
 	mIsRunning = true;
+	scene = 0;	//0はタイトル画面
+	mPaddlesNum = 0;
+	mBallsNum = 0;
+	thickness = 15.0f;
+	paddleH = 200.0f;
+	mBallsAcc = 1.5f;
+
+	while (mPaddlesNum == 0)
+	{
+		cout << "Number of players ? (1 or 2) : ";
+		cin >> mPaddlesNum;
+		static_cast<int>(mPaddlesNum);
+		if (mPaddlesNum != 1 && mPaddlesNum != 2) 
+		{
+			cout << "incorrect number." << endl;
+			mPaddlesNum = 0;
+		}
+	}
+	while (mBallsNum <= 0)
+	{
+		cout << "Number of Balls ? (int) : ";
+		cin >> mBallsNum;
+		static_cast<int>(mBallsNum);
+		if (mBallsNum <= 0)
+		{
+			cout << "incorrect number." << endl;
+			mBallsNum = 0;
+		}
+	}
 }
+	
 
 bool Game::Initialize()
 {
@@ -70,17 +109,30 @@ bool Game::Initialize()
 	}
 
 	//ボールの位置・速さ・方向を初期化
-	Ball ball1_init = { {1024.0f / 2.0f , 768.0f / 3.0f } , { -200.0f , 235.0f} };	//ボール1の初期情報
-	Ball ball2_init = { {1024.0f / 2.0f , 768.0f * 2.0f / 3.0f } , { 200.0f , 235.0f} };	//ボール2の初期情報
-	//mBalls配列にボール1,2のVector2配列をpush backで追加
-	mBalls.push_back(ball1_init);
-	mBalls.push_back(ball2_init);
-	
+	double mBallsAngle = 0;		//ボール射出角度
+	int mBallsDirx = -1;	//ボール射出方向正負x
+	int mBallsDiry = -1;	//ボール射出方向正負y
+	random_device rnd;		// 非決定的な乱数生成器を生成
+	mt19937 mt(rnd());		//  メルセンヌ・ツイスタの32ビット版、引数は初期シード値
+	uniform_int_distribution<> rand(20, 46);	// 範囲指定一様乱数　射出角度
+	uniform_int_distribution<> randx(0, 2);	// 範囲指定一様乱数
+	uniform_int_distribution<> randy(0, 2);	// 範囲指定一様乱数
+	for (int i = 0; i < mBallsNum; i++) {
+		if (randx(mt) == 0) { mBallsDirx = -1; }
+		else { mBallsDirx = 1; }
+		if (randy(mt) == 0) { mBallsDiry = -1; }
+		else { mBallsDiry = 1; }
+		mBallsAngle = rand(mt) / 180.0f * M_PI;
+
+		Ball ball_init = { {1024.0f / 2.0f , 768.0f * (i+1) / (mBallsNum+1) } , { static_cast<float>(mBallsDirx * 300.0f * cos(mBallsAngle)) , mBallsDiry * static_cast<float>(mBallsDiry * 300.0f * sin(mBallsAngle))} };	//ボールの初期情報
+		//mBalls配列にボールのVector2配列をpush backで追加
+		mBalls.push_back(ball_init);
+	}
 	//パドルの位置・方向を初期化
-	mPaddlesPos.push_back({ 10.0f , 768.0f / 2.0f });	//パドル1の初期位置
-	mPaddlesPos.push_back({ 1000.0f , 768.0f / 2.0f });	//パドル2の初期位置
+	mPaddlesPos.push_back({ 10.0f+thickness/2.0f , 768.0f / 2.0f });	//パドル0の初期位置
+	mPaddlesPos.push_back({ 1024.0f - 10.0f -thickness/2.0f , 768.0f / 2.0f });	//パドル1の初期位置
+	mPaddlesDir.push_back(0);	//パドル0の初期方向
 	mPaddlesDir.push_back(0);	//パドル1の初期方向
-	mPaddlesDir.push_back(0);	//パドル2の初期方向
 	
 	
 	return true;	//初期化完了でtrueを返す。
@@ -120,7 +172,7 @@ void Game::ProcessInput()
 		mIsRunning = false;		//ゲームを終了するフラグ
 	}
 
-	// パドル1の方向
+	// パドル0の方向
 	mPaddlesDir[0] = 0;
 	if (state[SDL_SCANCODE_Q])		//　Qキーで上方向
 	{
@@ -131,7 +183,7 @@ void Game::ProcessInput()
 		mPaddlesDir[0] += 1;
 	}
 
-	// パドル2の方向
+	// パドル1の方向
 	mPaddlesDir[1] = 0;
 	if (state[SDL_SCANCODE_UP])		//　↑キーで上方向
 	{
@@ -154,9 +206,9 @@ void Game::UpdateGame()
 	float deltaTime = (SDL_GetTicks() - mTicksCount) / 1000.0f;
 
 	// Clamp maximum delta time value
-	if (deltaTime > 0.05f)
+	if (deltaTime > 0.033f)
 	{
-		deltaTime = 0.05f;
+		deltaTime = 0.033f;
 	}
 
 	// Update tick counts (for next frame)
@@ -167,96 +219,94 @@ void Game::UpdateGame()
 
 	// パドル位置の更新
 	// Update paddle position based on direction
-	if (mPaddleDir != 0)
+	for (int i = 0; i < mPaddlesNum; i++) 
 	{
-		mPaddlePos.y += mPaddleDir * 300.0f * deltaTime;	//パドルのY座標を、300ピクセル/秒だけ増減
-		// Make sure paddle doesn't move off screen!
-		if (mPaddlePos.y < (paddleH / 2.0f + thickness))
+		if (mPaddlesDir[i] != 0)
 		{
-			mPaddlePos.y = paddleH / 2.0f + thickness;
+			mPaddlesPos[i].y += mPaddlesDir[i] * 300.0f * deltaTime;	//パドルのY座標を、300ピクセル/秒だけ増減
+			// Make sure paddle doesn't move off screen!
+			if (mPaddlesPos[i].y < (paddleH / 2.0f + thickness))
+			{
+				mPaddlesPos[i].y = paddleH / 2.0f + thickness;
+			}
+			else if (mPaddlesPos[i].y >(768.0f - paddleH / 2.0f - thickness))
+			{
+				mPaddlesPos[i].y = 768.0f - paddleH / 2.0f - thickness;
+			}
 		}
-		else if (mPaddlePos.y > (768.0f - paddleH / 2.0f - thickness))
-		{
-			mPaddlePos.y = 768.0f - paddleH / 2.0f - thickness;
-		}
-	}
 
-	// Update paddle2 position based on direction
-	if (mPaddle2Dir != 0)
-	{
-		mPaddle2Pos.y += mPaddle2Dir * 300.0f * deltaTime;	//パドルのY座標を、300ピクセル/秒だけ増減
-		// Make sure paddle doesn't move off screen!
-		if (mPaddle2Pos.y < (paddleH / 2.0f + thickness))
-		{
-			mPaddle2Pos.y = paddleH / 2.0f + thickness;
-		}
-		else if (mPaddle2Pos.y > (768.0f - paddleH / 2.0f - thickness))
-		{
-			mPaddle2Pos.y = 768.0f - paddleH / 2.0f - thickness;
-		}
 	}
-
 
 	// ボール位置の更新
 	// Update ball position based on ball velocity
-	mBallPos.x += mBallVel.x * deltaTime;
-	mBallPos.y += mBallVel.y * deltaTime;
+	for (int i = 0; i < mBallsNum; i++) 
+	{
+		mBalls[i].pos.x += mBalls[i].vel.x * deltaTime;
+		mBalls[i].pos.y += mBalls[i].vel.y * deltaTime;
+		
+		// Did the ball go off the screen? (if so, end game)
+		if (mBalls[i].pos.x <= 0.0f || mBalls[i].pos.x >= 1024.0f)
+		{
+			mIsRunning = false;
+		}
 
-	// Bounce if needed
-	// Did we intersect with the paddle?
-	float diff = mPaddlePos.y - mBallPos.y;
-	// Take absolute value of difference
-	diff = (diff > 0.0f) ? diff : -diff;
-	if (
-		// Our y-difference is small enough
-		diff <= paddleH / 2.0f &&
-		// We are in the correct x-position
-		mBallPos.x <= 25.0f && mBallPos.x >= 20.0f &&
-		// The ball is moving to the left
-		mBallVel.x < 0.0f)
-	{
-		mBallVel.x *= -1.0f;
-	}
 
-	// Did the ball go off the screen? (if so, end game)
-	if (mBallPos.x <= 0.0f || mBallPos.x >= 1024.0f)
-	{
-		mIsRunning = false;
-	}
-	//
-	// Did the ball collide with the right wall?
-	//else if (mBallPos.x >= (1024.0f - thickness) && mBallVel.x > 0.0f)
-	//{
-	//	mBallVel.x *= -1.0f;
-	//}
+		// ボール　壁での跳ね返り　
+		// Did the ball collide with the top or bottom wall?
+		if ( ( (mBalls[i].pos.y <= thickness*1.5f) && (mBalls[i].vel.y < 0.0f) )
+			|| ((mBalls[i].pos.y >= (768.0f - thickness*1.5f)) && (mBalls[i].vel.y > 0.0f)))
+		{
+			mBalls[i].vel.y *= -1.0f;
+		}
+		// Did the ball collide with the right wall ? (1player)
+		if (mPaddlesNum == 1) 
+		{
+			if ( (mBalls[i].pos.x >= 1024.0f - thickness*1.5f) &&
+				 (mBalls[i].vel.x > 0.0f))
+			{
+				mBalls[i].vel.x *= -1.0f;
+				
 
-	// Did the ball collide with the top wall?
-	if (mBallPos.y <= thickness && mBallVel.y < 0.0f)
-	{
-		mBallVel.y *= -1;
-	}
-	// Did the ball collide with the bottom wall?
-	else if (mBallPos.y >= (768 - thickness) &&
-		mBallVel.y > 0.0f)
-	{
-		mBallVel.y *= -1;
-	}
+			}
+		}
 
-	// 2プレイヤーでの玉の跳ね返り
-	// Did we intersect with the paddle2?
-	float diff2 = mPaddle2Pos.y - mBallPos.y;
-	// Take absolute value of difference
-	diff2 = (diff2 > 0.0f) ? diff2 : -diff2;
-	if (
-		// Our y-difference is small enough
-		diff2 <= paddleH / 2.0f &&
-		// We are in the correct x-position
-		mBallPos.x >= ( 1024.0f - 25.0f ) && mBallPos.x <= ( 1024.0f - 20.0f ) &&
-		// The ball is moving to the right
-		mBallVel.x > 0.0f)
-	{
-		mBallVel.x *= -1.0f;
+
+		//　ボール　パドルでの跳ね返り
+		//　一度シンプルにする
+		float diff[2] = { 0.0f,0.0f };
+		diff[0] = mPaddlesPos[0].y - mBalls[i].pos.y;	//パドル0とボールのy方向距離
+		diff[1] = mPaddlesPos[1].y - mBalls[i].pos.y;	//パドル1とボールのy方向距離
+		// 絶対値をとる
+		if (diff[0] < 0.0f) { diff[0] *= -1.0f; }
+		if (diff[1] < 0.0f) { diff[1] *= -1.0f; }
+
+		if (
+			// ボールとパドルのy方向距離が十分に小さく
+			diff[0] <= paddleH / 2.0f &&
+			// ボールが正しいx位置にあり
+			mBalls[i].pos.x <= mPaddlesPos[0].x + thickness * 1.5f && mBalls[i].pos.x >= mPaddlesPos[0].x &&
+			// ボールが左向きに動いていれば
+			mBalls[i].vel.x < 0.0f
+			)
+		{
+			mBalls[i].vel.x *= -1.0f * mBallsAcc;
+			
+		}
+		if (
+			// ボールとパドルのy方向距離が十分に小さく
+			diff[1] <= paddleH / 2.0f &&
+			// ボールが正しいx位置にあり
+			(mBalls[i].pos.x <= mPaddlesPos[1].x ) && (mBalls[i].pos.x >= mPaddlesPos[1].x - thickness * 1.5f) &&
+			// ボールが右向きに動いていれば
+			mBalls[i].vel.x > 0.0f
+			)
+		{
+			mBalls[i].vel.x *= -1.0f * mBallsAcc;
+		}
+		if (mBalls[i].vel.x < -1000.0f) { mBalls[i].vel.x = -1000.0f; }
+		else if (mBalls[i].vel.x > 1000.0f) { mBalls[i].vel.x = 1000.0f; }
 	}
+	
 
 	
 }
@@ -287,70 +337,61 @@ void Game::GenerateOutput()
 	};
 	SDL_RenderFillRect(mRenderer, &wall);	//作成した長方形を描画（塗りつぶし）
 	// 下側の壁を描画
-	wall.y = 768 - thickness;
+	wall.y = static_cast<int>(768-thickness);
 	SDL_RenderFillRect(mRenderer, &wall);	//作成した長方形を描画（塗りつぶし）	
 	// 右側の壁を描画　※2人プレイヤーでは不要
-	//wall.x = 1024 - thickness;
-	//wall.y = 0;
-	//wall.w = thickness;
-	//wall.h = 1024;
-	//SDL_RenderFillRect(mRenderer, &wall);
-
+	if (mPaddlesNum < 2) {
+		wall.x = 1024 - static_cast<int>(thickness);
+		wall.y = 0;
+		wall.w = static_cast<int>(thickness);
+		wall.h = 1024;
+		SDL_RenderFillRect(mRenderer, &wall);
+	}
+	
 
 	// パドルを描画
-	SDL_Rect paddle{
-		// static_cast演算子は、floatからintに変換する
-		static_cast<int>(mPaddlePos.x),
-		static_cast<int>(mPaddlePos.y - paddleH / 2),
-		thickness,
-		static_cast<int>(paddleH)
-	};
-	//パドルの色を設定
-	SDL_SetRenderDrawColor(
-		mRenderer,
-		0,		// R
-		0,		// G 
-		200,		// B
-		255		// A
-	);
-	SDL_RenderFillRect(mRenderer, &paddle);
+	for (int j = 0; j < mPaddlesNum; j++)
+	{
+		SDL_Rect paddle{
+			// static_cast演算子は、floatからintに変換する
+			static_cast<int>(mPaddlesPos[j].x - thickness/2.0f),
+			static_cast<int>(mPaddlesPos[j].y - paddleH / 2.0f),
+			thickness,
+			static_cast<int>(paddleH)
+		};
+		//パドルの色を設定
+		SDL_SetRenderDrawColor(
+			mRenderer,
+			0,		// R
+			200*j,		// G 
+			200*(1-j),	// B
+			255		// A
+		);
+		SDL_RenderFillRect(mRenderer, &paddle);
 
-	// パドル2を描画
-	SDL_Rect paddle2{
-		// static_cast演算子は、floatからintに変換する
-		static_cast<int>(mPaddle2Pos.x),
-		static_cast<int>(mPaddle2Pos.y - paddleH / 2),
-		thickness,
-		static_cast<int>(paddleH)
-	};
-	//パドルの色を設定
-	SDL_SetRenderDrawColor(
-		mRenderer,
-		0,		// R
-		200,		// G 
-		0,		// B
-		255		// A
-	);
-	SDL_RenderFillRect(mRenderer, &paddle2);
+	}
 
 	// ボールの描画
-	SDL_Rect ball{
-		// static_cast演算子は、floatからintに変換する
-		static_cast<int>(mBallPos.x - thickness / 2),
-		static_cast<int>(mBallPos.y - thickness / 2),
-		thickness,
-		thickness
-	};
-	//ボールの色を設定
-	SDL_SetRenderDrawColor(
-		mRenderer,
-		200,		// R
-		0,		// G 
-		0,		// B
-		255		// A
-	);
-	SDL_RenderFillRect(mRenderer, &ball);
-
+	for (int i = 0; i < mBallsNum; i++)
+	{
+		SDL_Rect ball{
+			// static_cast演算子は、floatからintに変換する
+			static_cast<int>(mBalls[i].pos.x - thickness / 2.0f),
+			static_cast<int>(mBalls[i].pos.y - thickness / 2.0f),
+			thickness,
+			thickness
+		};
+		//ボールの色を設定
+		SDL_SetRenderDrawColor(
+			mRenderer,
+			200,		// R
+			0,		// G 
+			0,		// B
+			255		// A
+		);
+		SDL_RenderFillRect(mRenderer, &ball);
+	}
+	
 	// 描画バッファの交換
 	SDL_RenderPresent(mRenderer);
 }
