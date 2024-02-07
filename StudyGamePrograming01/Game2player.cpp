@@ -114,7 +114,7 @@ bool Game::Initialize()
 	int mBallsDiry = -1;	//ボール射出方向正負y
 	random_device rnd;		// 非決定的な乱数生成器を生成
 	mt19937 mt(rnd());		//  メルセンヌ・ツイスタの32ビット版、引数は初期シード値
-	uniform_int_distribution<> rand(20, 46);	// 範囲指定一様乱数　射出角度
+	uniform_int_distribution<> rand(20, 61);	// 範囲指定一様乱数　射出角度
 	uniform_int_distribution<> randx(0, 2);	// 範囲指定一様乱数
 	uniform_int_distribution<> randy(0, 2);	// 範囲指定一様乱数
 	for (int i = 0; i < mBallsNum; i++) {
