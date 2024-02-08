@@ -70,7 +70,7 @@ private:
 	int mBallsNum;	//ボールの数
 	int mPaddlesNum;	//パドルの数
 	float paddleH;	//パドルの長さ
-	float thickness;	//壁・玉・パドルの厚み
+	int thickness;	//壁・玉・パドルの厚み
 	float mBallsAcc;	//ボールの加速度
 
 	// タイトル画面かプレイ画面かの変数

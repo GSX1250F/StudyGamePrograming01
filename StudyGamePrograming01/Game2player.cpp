@@ -1,5 +1,5 @@
 #include "Game2player.h"
-#include <iostream>
+//#include <iostream>
 #include <random>
 #include <math.h>
 
@@ -20,12 +20,12 @@ Game::Game()
 	mTicksCount = 0;
 	mIsRunning = true;
 	scene = 0;	//0はタイトル画面
-	mPaddlesNum = 0;
-	mBallsNum = 0;
-	thickness = 15.0f;
-	paddleH = 200.0f;
-	mBallsAcc = 1.5f;
-
+	mPaddlesNum = 1;
+	mBallsNum = 2;
+	thickness = 15;
+	paddleH = 150.0f;
+	mBallsAcc = 1.2f;
+/*
 	while (mPaddlesNum == 0)
 	{
 		cout << "Number of players ? (1 or 2) : ";
@@ -48,6 +48,7 @@ Game::Game()
 			mBallsNum = 0;
 		}
 	}
+*/
 }
 	
 
@@ -337,7 +338,7 @@ void Game::GenerateOutput()
 	};
 	SDL_RenderFillRect(mRenderer, &wall);	//作成した長方形を描画（塗りつぶし）
 	// 下側の壁を描画
-	wall.y = static_cast<int>(768-thickness);
+	wall.y = static_cast<int>(768.0f-thickness);
 	SDL_RenderFillRect(mRenderer, &wall);	//作成した長方形を描画（塗りつぶし）	
 	// 右側の壁を描画　※2人プレイヤーでは不要
 	if (mPaddlesNum < 2) {
