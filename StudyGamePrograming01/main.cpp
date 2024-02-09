@@ -1,5 +1,5 @@
 
-#include "Game2player.h"
+#include "GameVer2.h"
 
 int main(int argc, char** argv)
 {
@@ -18,7 +18,7 @@ int main(int argc, char** argv)
 
 	//ゲームの初期化
 	Game game;		
-
+	
 	//ゲームオーバーまでゲームをループ
 	bool success = game.Initialize();	
 	if (success)

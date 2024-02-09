@@ -115,7 +115,7 @@
       <GenerateMapFile>false</GenerateMapFile>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "C:\Users\tanada\source\SDL2-2.28.5\lib\$(PlatformTarget)\*.dll" "$(OutDir)" /i/s/y</Command>
+      <Command>xcopy "C:\etc\SDL\lib\$(PlatformTarget)\*.dll" "$(OutDir)" /i/s/y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -135,13 +135,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Ball.cpp" />
+    <ClCompile Include="Court.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Game2player.cpp" />
+    <ClCompile Include="GameVer2.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Paddle.cpp" />
+    <ClCompile Include="Pong.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Ball.h" />
+    <ClInclude Include="Court.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Game2player.h" />
+    <ClInclude Include="GameVer2.h" />
+    <ClInclude Include="Paddle.h" />
+    <ClInclude Include="Pong.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
