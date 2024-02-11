@@ -27,7 +27,11 @@ void Pong::render(SDL_Renderer* renderer)
 {
 	//•`‰æˆ—
 	L_Paddle->render(renderer);
-	R_Paddle->render(renderer);
+	if (PADDLES_NUM >1)
+	{
+		R_Paddle->render(renderer);
+	}
+	
 	for (auto it = mBalls.begin(); it != mBalls.end(); it++)
 	{
 		it->render(renderer);
@@ -52,7 +56,7 @@ void Pong::update(float deltaTime)
 		R_Paddle->update(deltaTime);
 		for (auto it = mBalls.begin(); it != mBalls.end(); it++)
 		{
-			it->update(L_Paddle, R_Paddle, this, deltaTime, it,scene);
+			it->update(L_Paddle, R_Paddle, this, deltaTime, it,scene,PADDLES_NUM);
 		}
 
 	}
