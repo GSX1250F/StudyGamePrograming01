@@ -11,7 +11,7 @@ void Ball::init()
 {
 	std::random_device rd;
 	std::default_random_engine eng(rd());
-	std::uniform_real_distribution<float> distr(7, 11);
+	std::uniform_real_distribution<float> distr(1, 11);
 	float iniv = distr(eng);
 	pos_x = BALL_INIT_X;
 	pos_y = BALL_INIT_Y;
@@ -19,7 +19,7 @@ void Ball::init()
 	vel_y = (float)sin(iniv / 12.0 * M_PI);
 }
 
-void Ball::update(Paddle* leftPaddle, Paddle* rightPaddle, Pong* pong, float deltaTime, std::vector<Ball>::iterator it,int scene,int PADDLES_NUM)
+void Ball::update(Paddle* leftPaddle, Paddle* rightPaddle, Pong* pong, float deltaTime, std::vector<Ball>::iterator it,bool& mIsRunning,int PADDLES_NUM)
 {
 	float x1 = pos_x;
 	float y1 = pos_y;
@@ -68,6 +68,7 @@ void Ball::update(Paddle* leftPaddle, Paddle* rightPaddle, Pong* pong, float del
 		case 2:
 			this->pos_x = point.x;
 			this->vel_x *= -1.0f;
+			this->vel_x *= 1.1f;
 			break;
 		case 3:
 		case 4:
@@ -84,11 +85,11 @@ void Ball::update(Paddle* leftPaddle, Paddle* rightPaddle, Pong* pong, float del
 	//‰æ–ÊŠO‚É‚ ‚éê‡
 	if (this->pos_x <= 0.0f)
 	{
-		scene = 2;
+		mIsRunning = false;
 	}
 	else if (this->pos_x >= WIN_W)
 	{
-		scene = 2;
+		mIsRunning = false;
 	}
 
 }

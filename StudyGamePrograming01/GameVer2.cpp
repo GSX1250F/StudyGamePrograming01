@@ -105,7 +105,7 @@ void Game::UpdateGame()			//更新
 	}
 	//パドル用
 	mTicksCount = SDL_GetTicks();
-	pong->update(deltaTime);		//ゲーム詳細をクラス化して、ゲーム経過時間を引数で渡し、ゲーム内容を処理する。
+	pong->update(deltaTime,mIsRunning);		//ゲーム詳細をクラス化して、ゲーム経過時間を引数で渡し、ゲーム内容を処理する。
 }
 
 void Game::GenerateOutput()			//画面を更新

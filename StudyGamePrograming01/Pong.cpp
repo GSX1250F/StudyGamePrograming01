@@ -3,8 +3,8 @@
 
 Pong::Pong()	//コンストラクタ 初期設定
 {
-	PADDLES_NUM = 1;		//とりあえず1player
-	BALLS_NUM = 1;		//とりあえず1個
+	PADDLES_NUM = 2;		
+	BALLS_NUM = 2;		
 	for (int i = 0; i < BALLS_NUM; i++)
 	{
 		Ball ball0_info = Ball();
@@ -18,9 +18,6 @@ Pong::Pong()	//コンストラクタ 初期設定
 
 Pong::~Pong()	//デストラクタ　作った構造体を消す
 {
-	delete court;
-	delete L_Paddle;
-	delete R_Paddle;
 }
 
 void Pong::render(SDL_Renderer* renderer)
@@ -47,7 +44,7 @@ void Pong::init()
 	mBalls[0].init();
 }
 
-void Pong::update(float deltaTime)
+void Pong::update(float deltaTime, bool& mIsRunning)
 {
 	if (scene == 1)
 	{
@@ -56,7 +53,7 @@ void Pong::update(float deltaTime)
 		R_Paddle->update(deltaTime);
 		for (auto it = mBalls.begin(); it != mBalls.end(); it++)
 		{
-			it->update(L_Paddle, R_Paddle, this, deltaTime, it,scene,PADDLES_NUM);
+			it->update(L_Paddle, R_Paddle, this, deltaTime, it,mIsRunning,PADDLES_NUM);
 		}
 
 	}

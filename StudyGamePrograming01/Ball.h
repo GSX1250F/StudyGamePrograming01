@@ -20,7 +20,7 @@ public:
 	float vel_x, vel_y;
 	Ball();
 	void init();
-	void update(Paddle*, Paddle*, Pong*, float, std::vector<Ball>::iterator,int,int);
+	void update(Paddle*, Paddle*, Pong*, float, std::vector<Ball>::iterator,bool&,int);
 	InterceptPoint intercept(float, float, float, float, float, float, float, float, int side = 5);
 	void render(SDL_Renderer*);
 };

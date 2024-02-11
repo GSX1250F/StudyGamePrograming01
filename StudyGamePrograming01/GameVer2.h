@@ -13,14 +13,14 @@
 #define WIN_H 768
 #define WALL_W 12
 #define PADDLE_W 12
-#define PADDLE_H 60
-#define PADDLE_SPEED 150.0f
+#define PADDLE_H 100
+#define PADDLE_SPEED 500.0f
 #define L_PADDLE_POS 24.0f
 #define R_PADDLE_POS WIN_W - 24.0f
 
 #define BALL_W 12
 #define BALL_SPEED 300.0f
-#define BALL_INIT_X WIN_W
+#define BALL_INIT_X WIN_W/2
 #define BALL_INIT_Y WIN_H/2
 #define BALL_INIT_VX cos(2.0/3.0*M_PI)
 #define BALL_INIT_VY sin(2.0/3.0*M_PI)

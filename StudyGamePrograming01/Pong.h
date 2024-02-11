@@ -30,7 +30,7 @@ public:
 	~Pong();
 	void render(SDL_Renderer*);			// レンダラー
 	void init();						// 初期化
-	void update(float);;					// 処理 (引数は deltatime)
+	void update(float,bool&);;					// 処理 (引数は deltatime)
 	void input(const Uint8*);			// 入力受付 (引数は const Uint8* state = SDL_GetKeyboardState(NULL) の内容
 	
 	//コート
