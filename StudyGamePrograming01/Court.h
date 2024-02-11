@@ -1,9 +1,7 @@
 #pragma once
 #include "SDL.h"
-#include "Pong.h"
 
-
-class Court : public Pong
+class Court
 {
 private:
 	SDL_Rect upperWall;
@@ -12,6 +10,6 @@ private:
 	SDL_Rect net[14];
 public:
 	Court();
-	void render(SDL_Renderer*);
+	void render(SDL_Renderer*,int);
 };
 

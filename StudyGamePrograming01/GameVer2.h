@@ -1,24 +1,42 @@
 #pragma once
 #include <cstdio>
 #include <cstdlib>
+#include <vector>
+#include <math.h>
 #include <iostream>//デバックとかで
 #include "SDL.h"
+#include "Ball.h"
+#include "Paddle.h"
 #include "Pong.h"
-using namespace std;
 
+#define WIN_W 1024
+#define WIN_H 768
+#define WALL_W 12
+#define PADDLE_W 12
+#define PADDLE_H 60
+#define PADDLE_SPEED 150.0f
+#define L_PADDLE_POS 24.0f
+#define R_PADDLE_POS WIN_W - 24.0f
+
+#define BALL_W 12
+#define BALL_SPEED 300.0f
+#define BALL_INIT_X WIN_W
+#define BALL_INIT_Y WIN_H/2
+#define BALL_INIT_VX cos(2.0/3.0*M_PI)
+#define BALL_INIT_VY sin(2.0/3.0*M_PI)
+
+//#define PREDICTION_WAITTIME 0.1f
+//#define WARD_W 50
+//#define WARD_WG 5
+//#define WARD_HG 20
 
 class Game
 {
 public:
 	Game();
-	virtual ~Game();
 	bool Initialize();			//ゲームを初期化する
 	void RunLoop();				//ゲームオーバーまでゲームループを実行する
 	void Shutdown();			//ゲームをシャットダウンする
-
-protected:
-	const int WIN_W = 1024;		// ゲーム画面横幅
-	const int WIN_H = 768;		// ゲーム画面縦幅
 
 private:
 	//ゲームループのためのヘルパー関数群
@@ -32,8 +50,5 @@ private:
 	bool mIsRunning;			//ゲームの続行を支持する
 
 	Pong* pong;					//ゲーム内容をクラス化
-
-
-
 
 };

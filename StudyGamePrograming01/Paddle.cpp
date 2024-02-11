@@ -1,4 +1,5 @@
 #include "Paddle.h"
+#include "GameVer2.h"
 
 Paddle::Paddle(float x, float y) 
 {

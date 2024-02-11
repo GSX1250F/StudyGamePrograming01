@@ -1,4 +1,5 @@
 #include "Court.h"
+#include "GameVer2.h"
 
 Court::Court()
 {
@@ -31,7 +32,7 @@ Court::Court()
 	}
 }
 
-void Court::render(SDL_Renderer* renderer)
+void Court::render(SDL_Renderer* renderer,int PADDLES_NUM)
 {
 	// ã•Ç‚ğì¬
 	SDL_RenderFillRect(renderer, &upperWall);

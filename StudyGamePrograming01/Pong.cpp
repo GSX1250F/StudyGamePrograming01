@@ -1,13 +1,5 @@
-#include <cstdio>
-#include <cstdlib>
-#include <vector>
-#include <math.h>
-#include "SDL.h"
-#include "Ball.h"		// ボール
-#include "Paddle.h"		// パドル
-#include "Court.h"		// コート
 #include "Pong.h"
-using namespace std;
+#include "GameVer2.h"
 
 Pong::Pong()	//コンストラクタ 初期設定
 {
@@ -21,7 +13,6 @@ Pong::Pong()	//コンストラクタ 初期設定
 	
 	L_Paddle = new Paddle(L_PADDLE_POS, WIN_H / 2.0f);
 	R_Paddle = new Paddle(R_PADDLE_POS, WIN_H / 2.0f);
-
 	court = new Court();
 }
 
@@ -41,7 +32,7 @@ void Pong::render(SDL_Renderer* renderer)
 	{
 		it->render(renderer);
 	}
-	court->render(renderer);
+	court->render(renderer,PADDLES_NUM);
 }
 
 void Pong::init()
@@ -61,7 +52,7 @@ void Pong::update(float deltaTime)
 		R_Paddle->update(deltaTime);
 		for (auto it = mBalls.begin(); it != mBalls.end(); it++)
 		{
-			it->update(L_Paddle, R_Paddle, this, deltaTime, it);
+			it->update(L_Paddle, R_Paddle, this, deltaTime, it,scene);
 		}
 
 	}

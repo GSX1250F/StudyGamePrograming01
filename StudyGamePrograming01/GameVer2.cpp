@@ -11,10 +11,6 @@ Game::Game()
 	pong = new Pong();			//ゲーム内容をクラス化
 }
 
-Game::~Game()
-{
-}
-
 bool Game::Initialize()			//ゲーム初期設定。ウィンドウ作成、レンダラー初期化
 {
 	// SDL初期化

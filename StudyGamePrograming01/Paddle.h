@@ -1,7 +1,9 @@
 #pragma once
-#include "Pong.h"
+#include "SDL.h"
+#include "Ball.h"
+class Ball;
 
-class Paddle : public Pong
+class Paddle
 {
 private:
 	float pos_x, pos_y;

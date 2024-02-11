@@ -1,4 +1,5 @@
 #include "Ball.h"
+#include "GameVer2.h"
 #include <random>
 
 Ball::Ball()
@@ -14,11 +15,11 @@ void Ball::init()
 	float iniv = distr(eng);
 	pos_x = BALL_INIT_X;
 	pos_y = BALL_INIT_Y;
-	vel_x = cos(iniv / 12.0 * M_PI);
-	vel_y = sin(iniv / 12.0 * M_PI);
+	vel_x = (float)cos(iniv / 12.0 * M_PI);
+	vel_y = (float)sin(iniv / 12.0 * M_PI);
 }
 
-void Ball::update(Paddle* leftPaddle, Paddle* rightPaddle, Pong* pong, float deltaTime, std::vector<Ball>::iterator it)
+void Ball::update(Paddle* leftPaddle, Paddle* rightPaddle, Pong* pong, float deltaTime, std::vector<Ball>::iterator it,int scene,int PADDLES_NUM)
 {
 	float x1 = pos_x;
 	float y1 = pos_y;
@@ -39,6 +40,17 @@ void Ball::update(Paddle* leftPaddle, Paddle* rightPaddle, Pong* pong, float del
 		y2 = WIN_H - WALL_W - (y2 - (WIN_H - WALL_W));
 		this->vel_y *= -1;
 	}
+
+	// ‰E•Ç‚Å‚Ì’µ‚Ë•Ô‚è
+	else if (PADDLES_NUM == 1 &&
+		x2 >= (WIN_W - WALL_W) &&
+		this->vel_x > 0.0f)
+	{
+		x2 = WIN_W - WALL_W - (x2 - (WIN_W - WALL_W));
+		this->vel_x *= -1;
+	}
+
+
 	//ƒpƒhƒ‹‚Å‚Ì’µ‚Ë•Ô‚è
 	Paddle* paddle = (this->vel_x < 0) ? leftPaddle : rightPaddle;
 	InterceptPoint point{ 0,0,0 };
