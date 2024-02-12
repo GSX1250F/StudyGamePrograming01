@@ -19,7 +19,7 @@ int main(int argc, char** argv)
 	//ゲームの初期化
 	Game game;		
 
-	//ゲームオーバーまでゲームをループ
+	//ゲームオーバーまでゲームをループaaaaa
 	bool success = game.Initialize();	
 	if (success)
 	{
