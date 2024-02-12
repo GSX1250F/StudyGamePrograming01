@@ -1,3 +1,4 @@
+/*
 #include "Game2player.h"
 //#include <iostream>
 #include <random>
@@ -11,8 +12,9 @@ using namespace std;
 // 課題1.5　ボールの初期方向をランダムにする。
 // 課題1.6　ボールがパドルでバウンドする毎に、スピードが少しずつ速くなる。（難易度少しずつアップ）
 // 課題1.7　ボール2つ以上も可能
+*/
 
-
+/*
 Game::Game()
 {
 	mWindow = nullptr;
@@ -25,6 +27,7 @@ Game::Game()
 	thickness = 15;
 	paddleH = 150.0f;
 	mBallsAcc = 1.2f;
+*/
 /*
 	while (mPaddlesNum == 0)
 	{
@@ -48,10 +51,11 @@ Game::Game()
 			mBallsNum = 0;
 		}
 	}
-*/
-}
-	
 
+}
+*/	
+
+/*
 bool Game::Initialize()
 {
 	// Initialize SDL
@@ -403,3 +407,4 @@ void Game::Shutdown()
 	SDL_DestroyWindow(mWindow);		// SDL_Windowを破棄
 	SDL_Quit();						// SDL終了
 }
+*/

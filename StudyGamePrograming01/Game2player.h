@@ -12,7 +12,7 @@
 //プレイヤー数を選択制にする場合、タイトル画面とプレイ画面を構築。
 // scene変数を用意し、0のときはタイトル、1のときはプレイ画面とする。
 
-
+/*
 #pragma once
 #include <cstdio>
 #include <cstdlib>
@@ -81,3 +81,4 @@ private:
 	// mPaddleNum を 1か2で選択にして、Paddle構造体を その数だけ作ればいいのでは。
 	// 
 };
+*/
