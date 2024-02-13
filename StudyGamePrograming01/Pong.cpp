@@ -1,18 +1,10 @@
-#include <cstdio>
-#include <cstdlib>
-#include <vector>
-#include <math.h>
-#include "SDL.h"
-#include "Ball.h"		// ボール
-#include "Paddle.h"		// パドル
-#include "Court.h"		// コート
 #include "Pong.h"
-using namespace std;
+#include "GameVer2.h"
 
 Pong::Pong()	//コンストラクタ 初期設定
 {
-	PADDLES_NUM = 1;		//とりあえず1player
-	BALLS_NUM = 1;		//とりあえず1個
+	PADDLES_NUM = 2;		
+	BALLS_NUM = 2;		
 	for (int i = 0; i < BALLS_NUM; i++)
 	{
 		Ball ball0_info = Ball();
@@ -21,27 +13,27 @@ Pong::Pong()	//コンストラクタ 初期設定
 	
 	L_Paddle = new Paddle(L_PADDLE_POS, WIN_H / 2.0f);
 	R_Paddle = new Paddle(R_PADDLE_POS, WIN_H / 2.0f);
-
 	court = new Court();
 }
 
 Pong::~Pong()	//デストラクタ　作った構造体を消す
 {
-	delete court;
-	delete L_Paddle;
-	delete R_Paddle;
 }
 
 void Pong::render(SDL_Renderer* renderer)
 {
 	//描画処理
 	L_Paddle->render(renderer);
-	R_Paddle->render(renderer);
+	if (PADDLES_NUM >1)
+	{
+		R_Paddle->render(renderer);
+	}
+	
 	for (auto it = mBalls.begin(); it != mBalls.end(); it++)
 	{
 		it->render(renderer);
 	}
-	court->render(renderer);
+	court->render(renderer,PADDLES_NUM);
 }
 
 void Pong::init()
@@ -52,7 +44,7 @@ void Pong::init()
 	mBalls[0].init();
 }
 
-void Pong::update(float deltaTime)
+void Pong::update(float deltaTime, bool& mIsRunning)
 {
 	if (scene == 1)
 	{
@@ -61,7 +53,7 @@ void Pong::update(float deltaTime)
 		R_Paddle->update(deltaTime);
 		for (auto it = mBalls.begin(); it != mBalls.end(); it++)
 		{
-			it->update(L_Paddle, R_Paddle, this, deltaTime, it);
+			it->update(L_Paddle, R_Paddle, this, deltaTime, it,mIsRunning,PADDLES_NUM);
 		}
 
 	}
