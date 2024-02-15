@@ -1,5 +1,4 @@
-/*
-/ ----------------------------------------------------------------
+// ----------------------------------------------------------------
 // From Game Programming in C++ by Sanjay Madhav
 // Copyright (C) 2017 Sanjay Madhav. All rights reserved.
 // 
@@ -299,4 +298,3 @@ void Game::Shutdown()
 	SDL_DestroyWindow(mWindow);		// SDL_Window‚ğ”jŠü
 	SDL_Quit();						// SDLI—¹
 }
-*/
