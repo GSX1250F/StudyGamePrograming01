@@ -2,6 +2,8 @@
 
 const int thickness = 15;
 const float paddleH = 100.0f;
+const int mWindowW = 1024;
+const int mWindowH = 768;
 
 Game::Game()
 	:mWindow(nullptr)
@@ -15,63 +17,46 @@ Game::Game()
 
 bool Game::Initialize()
 {
-	// Initialize SDL
+	//SDLを初期化
 	int sdlResult = SDL_Init(SDL_INIT_VIDEO);	//ビデオサブシステムの初期化。返り値は整数。返り値が0でないときは初期化失敗
-	// SDL_INIT_AUDIO	:	オーディオデバイスの管理、再生、録音
-	// SDL_INIT_HAPTIC	:	フォースフィードバック（振動など）のサブシステム
-	// SDL_INIT_GAMECONTROLLER	:	コントローラ入力デバイスのサブシステム
-
+	
 	if (sdlResult != 0)
 	{
-		SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
+		SDL_Log("SDLの初期化に失敗しました: %s", SDL_GetError());
 		return false;
 	}
 
-	// Create an SDL Window
+	// SDL Windowを作成
 	mWindow = SDL_CreateWindow(
-		"Game Programming in C++ (Chapter 1)", // Window title
-		100,	// Top left x-coordinate of window
-		100,	// Top left y-coordinate of window
-		1024,	// Width of window
-		768,	// Height of window
-		0		// Flags (0 for no flags set)
+		"Game Programming in C++", // Windowタイトル
+		100,	// windowの左上のX座標
+		100,	// windowの左上のY座標
+		mWindowW,	// windowの横幅
+		mWindowH,	// windowの縦幅
+		0		// フラグ (0 は何もセットしない)
 	);
-	// SDL_WINDOW_FULLSCREEN : フルスクリーンモード使用
-	// SDL_WINDOW_FULSCREEN_DESKTOP : 現在のデスクトップの解像度でフルスクリーンモードを使用
-	// SDL_WINDOW_OPENGL : OpenGLグラフィックスライブラリを使用
-	// SDL_WINDOW_RESIZABLE : ユーザーがウィンドウの大きさを変えられる。
-
+	
 	if (!mWindow)
 	{
-		SDL_Log("Failed to create window: %s", SDL_GetError());
+		SDL_Log("window作成に失敗しました: %s", SDL_GetError());
 		return false;
 	}
 
-	//// Create SDL renderer
-	// ラスターグラフィックス：ディスプレイはピクセルの2次元格子で構成されている。
-	// カラーバッファという2次元配列に画面全体の色情報が置かれる。
-	// ※フレームバッファはカラーバッファ・デプスバッファ・ステンシルバッファなどの組合せの総称。
-
-	// ダブルバッファ技術
-	// カラーバッファを２つ用意する。ゲームは１つのバッファに書き込み、ディスプレイはもう１つのバッファを表示する。
-	// ディスプレイが表示を終えると、２つのバッファは交換される。
-	// ディスプレイが表示を終えて、バッファが交換されるサイクルを　vsync（垂直同期）　という。
-	// 2Dグラフィックス描画用の関数群を　SDL_Renderer　で利用する。
+	// SDLレンダラーを作成
 	mRenderer = SDL_CreateRenderer(
-		mWindow, // Window to create renderer for
-		-1,		 // Usually -1
+		mWindow, // レンダラーの対象
+		-1,		 // 通常は -1
 		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
 	);
 
 	if (!mRenderer)
 	{
-		//レンダラーの初期化に失敗したとき
-		SDL_Log("Failed to create renderer: %s", SDL_GetError());
+		SDL_Log("レンダラーの作成に失敗しました: %s", SDL_GetError());
 		return false;
 	}
 
 	//パドル、ボールの位置・速さ・方向を初期化
-	mPaddlePos.x = 10.0f;
+	mPaddlePos.x = thickness * 0.75f;
 	mPaddlePos.y = 768.0f / 2.0f;
 	mBallPos.x = 1024.0f / 2.0f;
 	mBallPos.y = 768.0f / 2.0f;
