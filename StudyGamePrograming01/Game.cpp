@@ -1,11 +1,10 @@
 #include "Game.h"
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
+#include <string>
 
-const int thickness = 15;
-const float paddleH = 150.0f;
-const int mWindowW = 1024;
-const int mWindowH = 768;
+
 
 Game::Game()
 	:mWindow(nullptr)
@@ -66,28 +65,36 @@ bool Game::Initialize()
 	mBallVel.y = 235.0f;
 
 	// パドルのスプライト用画像を読み込み
-	SDL_Texture* tex = nullptr;
+	paddleImage = nullptr;
+	std::string filename = "Assets/paddle.png";
+	SDL_Surface* surf = IMG_Load(filename.c_str());
+	if (!surf)
+	{
+		SDL_Log("テクスチャファイルの読み込みに失敗しました %s", filename.c_str());
+		return false;
+	}
+	paddleImage = SDL_CreateTextureFromSurface(mRenderer, surf);
+	SDL_FreeSurface(surf);
+	if (!paddleImage)
+	{
+		SDL_Log("サーフェイスからテクスチャの作成に失敗しました %s", filename.c_str());
+		return false;
+	}
 
-	// ファイルからロード
-	SDL_Surface* surf = IMG_Load("../../Assets/paddle.png");
-		if (!surf)
-		{
-			SDL_Log("Failed to load texture file %s", filename.c_str());
-			return nullptr;
-		}
-
-		// サーフェイスからテクスチャを作成
-		tex = SDL_CreateTextureFromSurface(mRenderer, surf);
-		SDL_FreeSurface(surf);
-		if (!tex)
-		{
-			SDL_Log("Failed to convert surface to texture for %s", filename.c_str());
-			return nullptr;
-		}
-
-		mTextures.emplace(filename.c_str(), tex);
-
-
+	// ゲームオーバー画面を用意
+	if (TTF_Init()<0) 
+	{
+		SDL_Log("TTFの初期化に失敗しました %s", filename.c_str());
+		return false;
+	}
+	TTF_Font* font = TTF_OpenFont("ipag-mona.ttf", 24); /* IPAモナーフォントを使用 */
+	auto string_color = SDL_Color();
+	string_color.r = 0;
+	string_color.g = 0;
+	string_color.b = 255;
+	string_color.a = 255;
+	auto test = TTF_RenderUTF8_Blended(font, u8"anti aliased string", string_color);
+	gameOver = SDL_CreateTextureFromSurface(mRenderer, surf);
 
 	return true;	//初期化完了でtrueを返す。
 }
@@ -246,14 +253,14 @@ void Game::GenerateOutput()
 	SDL_RenderFillRect(mRenderer, &wall);
 
 	// パドルを描画
+	/*
 	SDL_Rect paddle{
 		// static_cast演算子は、floatからintに変換する
-		static_cast<int>(mPaddlePos.x),
-		static_cast<int>(mPaddlePos.y - paddleH / 2),
+		static_cast<int>(mPaddlePos.x - thickness / 2.0f),
+		static_cast<int>(mPaddlePos.y - paddleH / 2.0f),
 		thickness,
 		static_cast<int>(paddleH)
 	};
-	//パドルの色を設定
 	SDL_SetRenderDrawColor(
 		mRenderer,
 		255,		// R
@@ -262,6 +269,18 @@ void Game::GenerateOutput()
 		255			// A
 	);
 	SDL_RenderFillRect(mRenderer, &paddle);
+	*/
+	if (paddleImage)
+	{
+		SDL_Rect r;
+		r.w = static_cast<int>(thickness);
+		r.h = static_cast<int>(paddleH);
+		r.x = static_cast<int>(mPaddlePos.x - thickness / 2.0f);
+		r.y = static_cast<int>(mPaddlePos.y - paddleH / 2.0f);
+
+		SDL_RenderCopyEx(mRenderer, paddleImage, nullptr, &r, 0, nullptr, SDL_FLIP_NONE);
+	}
+
 
 	// ボールの描画
 	SDL_Rect ball{
@@ -271,7 +290,6 @@ void Game::GenerateOutput()
 		thickness,
 		thickness
 	};
-	//ボールの色を設定
 	SDL_SetRenderDrawColor(
 		mRenderer,
 		255,		// R
