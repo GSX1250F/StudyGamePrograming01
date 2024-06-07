@@ -26,6 +26,7 @@ private:
 	SDL_Renderer* mRenderer;	// 2D描画用レンダラ
 	Uint32 mTicksCount;		// ゲーム開始時からの経過時間
 	bool mIsRunning;		// ゲーム実行中か否か
+	SDL_Texture* mTexture;	// テクスチャ
 
 	// Game specific
 	int mPaddleDir;		// パドルの動作方向。+が下方向、-が上方向。

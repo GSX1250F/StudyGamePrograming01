@@ -1,4 +1,6 @@
 #include "Game.h"
+#include <SDL.h>
+#include <SDL_image.h>
 
 const int thickness = 15;
 const float paddleH = 150.0f;
@@ -62,6 +64,31 @@ bool Game::Initialize()
 	mBallPos.y = mWindowH / 2.0f;
 	mBallVel.x = -200.0f;
 	mBallVel.y = 235.0f;
+
+	// パドルのスプライト用画像を読み込み
+	SDL_Texture* tex = nullptr;
+
+	// ファイルからロード
+	SDL_Surface* surf = IMG_Load("../../Assets/paddle.png");
+		if (!surf)
+		{
+			SDL_Log("Failed to load texture file %s", filename.c_str());
+			return nullptr;
+		}
+
+		// サーフェイスからテクスチャを作成
+		tex = SDL_CreateTextureFromSurface(mRenderer, surf);
+		SDL_FreeSurface(surf);
+		if (!tex)
+		{
+			SDL_Log("Failed to convert surface to texture for %s", filename.c_str());
+			return nullptr;
+		}
+
+		mTextures.emplace(filename.c_str(), tex);
+
+
+
 	return true;	//初期化完了でtrueを返す。
 }
 
