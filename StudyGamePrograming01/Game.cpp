@@ -88,14 +88,14 @@ bool Game::Initialize()
 		return false;
 	}
 	
-	TTF_Font* font = TTF_OpenFont("test.ttf", 24);
+	TTF_Font* font = TTF_OpenFont("Assets/PixelMplus10-Regular.ttf", 24);
 	auto string_color = SDL_Color();
 	string_color.r = 255;
 	string_color.g = 255;
 	string_color.b = 255;
 	string_color.a = 255;
-	surf = TTF_RenderUTF8_Blended(font, "anti aliased string", string_color);
-	gameOver = SDL_CreateTextureFromSurface(mRenderer, surf);
+	surf = TTF_RenderUTF8_Blended(font, "Game Over /n", string_color);
+	gameOverText = SDL_CreateTextureFromSurface(mRenderer, surf);
 
 	SDL_FreeSurface(surf);
 
@@ -303,14 +303,14 @@ void Game::GenerateOutput()
 	SDL_RenderFillRect(mRenderer, &ball);
 
 	// ゲームオーバー画面の表示
-	if (gameOver)
+	if (gameOverText)
 	{
-		SDL_Rect r;
-		r.w = 800;
-		r.h = 400;
-		r.x = 100;
-		r.y = 100;
-		SDL_RenderCopyEx(mRenderer, gameOver, nullptr, &r, 0, nullptr, SDL_FLIP_NONE);
+		SDL_Rect txtRect;
+		r.w = mWindowW;
+		r.h = mWindowH;
+		r.x = 0;
+		r.y = 0;
+		SDL_RenderCopy(mRenderer, gameOverText, nullptr, &r, 0, nullptr, SDL_FLIP_NONE);
 	}
 
 

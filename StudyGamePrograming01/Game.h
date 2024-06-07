@@ -37,6 +37,6 @@ private:
 	const int mWindowW = 1024;	//ウィンドウの横幅
 	const int mWindowH = 768;	//ウィンドウの縦幅
 	SDL_Texture* paddleImage;	// パドルのテクスチャ
-	SDL_Texture* gameOver;		// ゲームオーバーのテキスト表示用
+	SDL_Texture* gameOverText;		// ゲームオーバーのテキスト表示用
 
 };
