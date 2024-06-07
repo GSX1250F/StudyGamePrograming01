@@ -1,7 +1,7 @@
 #include "Game.h"
 
 const int thickness = 15;
-const float paddleH = 100.0f;
+const float paddleH = 150.0f;
 const int mWindowW = 1024;
 const int mWindowH = 768;
 
@@ -137,50 +137,46 @@ void Game::UpdateGame()
 		{
 			mPaddlePos.y = paddleH / 2.0f + thickness;
 		}
-		else if (mPaddlePos.y > (768.0f - paddleH / 2.0f - thickness))
+		else if (mPaddlePos.y > (mWindowH - paddleH / 2.0f - thickness))
 		{
-			mPaddlePos.y = 768.0f - paddleH / 2.0f - thickness;
+			mPaddlePos.y = mWindowH - paddleH / 2.0f - thickness;
 		}
 	}
 
 	// ボール位置の更新
-	// Update ball position based on ball velocity
+	// 位置 += 速さ*deltaTime
 	mBallPos.x += mBallVel.x * deltaTime;
 	mBallPos.y += mBallVel.y * deltaTime;
 
-	// Bounce if needed
-	// Did we intersect with the paddle?
+	// パドルでボールを反射。
 	float diff = mPaddlePos.y - mBallPos.y;
-	// Take absolute value of difference
-	diff = (diff > 0.0f) ? diff : -diff;
+	diff = (diff > 0.0f) ? diff : -diff;		//絶対値にする
 	if (
-		// Our y-difference is small enough
-		diff <= paddleH / 2.0f &&
-		// We are in the correct x-position
-		mBallPos.x <= 25.0f && mBallPos.x >= 20.0f &&
-		// The ball is moving to the left
-		mBallVel.x < 0.0f)
+		
+		diff <= paddleH / 2.0f &&		// y座標の差が十分に小さく
+		mBallPos.x <= mPaddlePos.x + thickness && mBallPos.x >= mPaddlePos.x + thickness / 2.0f &&		// ボールのx座標がパドルの範囲内にあり
+		mBallVel.x < 0.0f)		// ボールが左向きに動いている
 	{
-		mBallVel.x *= -1.0f;
+		mBallVel.x *= -1.1f;		// ボールスピードアップ
 	}
-	// Did the ball go off the screen? (if so, end game)
+	// ボールが左端にいってしまったらゲームオーバー。
 	else if (mBallPos.x <= 0.0f)
 	{
 		mIsRunning = false;
 	}
-	// Did the ball collide with the right wall?
-	else if (mBallPos.x >= (1024.0f - thickness) && mBallVel.x > 0.0f)
+	// ボールが右壁に当たったら反射
+	else if (mBallPos.x >= (mWindowW - thickness) && mBallVel.x > 0.0f)
 	{
 		mBallVel.x *= -1.0f;
 	}
 
-	// Did the ball collide with the top wall?
+	// ボールが上壁に当たったら反射
 	if (mBallPos.y <= thickness && mBallVel.y < 0.0f)
 	{
 		mBallVel.y *= -1;
 	}
-	// Did the ball collide with the bottom wall?
-	else if (mBallPos.y >= (768 - thickness) &&
+	// ボールが下壁に当たったら反射
+	else if (mBallPos.y >= (mWindowH - thickness) &&
 		mBallVel.y > 0.0f)
 	{
 		mBallVel.y *= -1;
@@ -208,20 +204,19 @@ void Game::GenerateOutput()
 	SDL_Rect wall{
 		0,			// Top left x
 		0,			// Top left y
-		1024,		// Width
+		mWindowW,	// Width
 		thickness	// Height
 	};
 	SDL_RenderFillRect(mRenderer, &wall);	//作成した長方形を描画（塗りつぶし）
 	// 下側の壁を描画
-	wall.y = 768 - thickness;		
+	wall.y = mWindowH - thickness;		
 	SDL_RenderFillRect(mRenderer, &wall);	//作成した長方形を描画（塗りつぶし）	
 	// 右側の壁を描画
-	wall.x = 1024 - thickness;
+	wall.x = mWindowW - thickness;
 	wall.y = 0;
 	wall.w = thickness;
-	wall.h = 1024;
+	wall.h = mWindowW;
 	SDL_RenderFillRect(mRenderer, &wall);
-
 
 	// パドルを描画
 	SDL_Rect paddle{
@@ -234,10 +229,10 @@ void Game::GenerateOutput()
 	//パドルの色を設定
 	SDL_SetRenderDrawColor(
 		mRenderer,
-		0,		// R
-		0,		// G 
-		200,		// B
-		255		// A
+		255,		// R
+		255,		// G 
+		255,		// B
+		255			// A
 	);
 	SDL_RenderFillRect(mRenderer, &paddle);
 
@@ -252,9 +247,9 @@ void Game::GenerateOutput()
 	//ボールの色を設定
 	SDL_SetRenderDrawColor(
 		mRenderer,
-		200,		// R
-		0,		// G 
-		0,		// B
+		255,		// R
+		255,		// G 
+		255,		// B
 		255		// A
 	);
 	SDL_RenderFillRect(mRenderer, &ball);
