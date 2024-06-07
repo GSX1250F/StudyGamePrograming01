@@ -56,7 +56,7 @@ bool Game::Initialize()
 	}
 
 	//パドル、ボールの位置・速さ・方向を初期化
-	mPaddlePos.x = thickness;
+	mPaddlePos.x = thickness * 2.0f;
 	mPaddlePos.y = mWindowH / 2.0f;
 	mBallPos.x = mWindowW / 2.0f;
 	mBallPos.y = mWindowH / 2.0f;
