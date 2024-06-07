@@ -127,10 +127,7 @@ void Game::UpdateGame()
 	// 次のフレームのためtick countsを更新
 	mTicksCount = SDL_GetTicks();
 
-
-
-
-	// パドル位置の更新
+		// パドル位置の更新
 	// Update paddle position based on direction
 	if (mPaddleDir != 0)
 	{
