@@ -56,10 +56,10 @@ bool Game::Initialize()
 	}
 
 	//パドル、ボールの位置・速さ・方向を初期化
-	mPaddlePos.x = thickness * 0.75f;
-	mPaddlePos.y = 768.0f / 2.0f;
-	mBallPos.x = 1024.0f / 2.0f;
-	mBallPos.y = 768.0f / 2.0f;
+	mPaddlePos.x = thickness;
+	mPaddlePos.y = mWindowH / 2.0f;
+	mBallPos.x = mWindowW / 2.0f;
+	mBallPos.y = mWindowH / 2.0f;
 	mBallVel.x = -200.0f;
 	mBallVel.y = 235.0f;
 	return true;	//初期化完了でtrueを返す。
@@ -84,50 +84,47 @@ void Game::ProcessInput()
 	{
 		switch (event.type)
 		{
-			// If we get an SDL_QUIT event, end loop
-		case SDL_QUIT:		// ユーザーがウィンドウを閉じようとした入力のイベント
-			mIsRunning = false;		//ゲームを終了するフラグ
-			break;
+			case SDL_QUIT:		// ユーザーがウィンドウを閉じようとした入力のイベント
+				mIsRunning = false;		//ゲームを終了するフラグ
+				break;
 		}
 	}
 
-	// Get state of keyboard
+	// キーボードの状態を取得
 	const Uint8* state = SDL_GetKeyboardState(NULL);
-	// If escape is pressed, also end loop
 	if (state[SDL_SCANCODE_ESCAPE])		//ESCキーが押されたとき
 	{
 		mIsRunning = false;		//ゲームを終了するフラグ
 	}
 
-	// Update paddle direction based on W/S keys
-	mPaddleDir = 0;
-	if (state[SDL_SCANCODE_W])
+	// ↑↓キーでパドルの方向を決定
+	mPaddleDir = 0;		//方向を初期化
+	if (state[SDL_SCANCODE_UP])
 	{
-		mPaddleDir -= 1;
+		mPaddleDir -= 1;		//上方向はy座標を減らす方向
 	}
-	if (state[SDL_SCANCODE_S])
+	if (state[SDL_SCANCODE_DOWN])
 	{
-		mPaddleDir += 1;
+		mPaddleDir += 1;		//下方向はy座標を増やす方向
 	}
 }
 
 void Game::UpdateGame()
 {
 	//ゲーム時間の更新、制限など	
-	// Wait until 16ms has elapsed since last frame
+	//16ms経過までは待つ（フレーム制限）。約60fps
 	while (!SDL_TICKS_PASSED(SDL_GetTicks(), mTicksCount + 16));
 
-	// Delta time is the difference in ticks from last frame
-	// (converted to seconds)
+	// Delta timeを計算。単位は秒にする
 	float deltaTime = (SDL_GetTicks() - mTicksCount) / 1000.0f;
 
-	// Clamp maximum delta time value
+	// 更新が遅すぎても最低のfpsを確保
 	if (deltaTime > 0.05f)
 	{
-		deltaTime = 0.05f;
+		deltaTime = 0.05f;		//50ms (20fps)
 	}
 
-	// Update tick counts (for next frame)
+	// 次のフレームのためtick countsを更新
 	mTicksCount = SDL_GetTicks();
 
 
