@@ -74,12 +74,12 @@ bool Game::Initialize()
 		return false;
 	}
 	paddleImage = SDL_CreateTextureFromSurface(mRenderer, surf);
-	SDL_FreeSurface(surf);
 	if (!paddleImage)
 	{
 		SDL_Log("サーフェイスからテクスチャの作成に失敗しました %s", filename.c_str());
 		return false;
 	}
+	SDL_FreeSurface(surf);
 
 	// ゲームオーバー画面を用意
 	if (TTF_Init()<0) 
@@ -87,14 +87,17 @@ bool Game::Initialize()
 		SDL_Log("TTFの初期化に失敗しました %s", filename.c_str());
 		return false;
 	}
-	TTF_Font* font = TTF_OpenFont("ipag-mona.ttf", 24); /* IPAモナーフォントを使用 */
+	
+	TTF_Font* font = TTF_OpenFont("test.ttf", 24);
 	auto string_color = SDL_Color();
-	string_color.r = 0;
-	string_color.g = 0;
+	string_color.r = 255;
+	string_color.g = 255;
 	string_color.b = 255;
 	string_color.a = 255;
-	auto test = TTF_RenderUTF8_Blended(font, u8"anti aliased string", string_color);
+	surf = TTF_RenderUTF8_Blended(font, "anti aliased string", string_color);
 	gameOver = SDL_CreateTextureFromSurface(mRenderer, surf);
+
+	SDL_FreeSurface(surf);
 
 	return true;	//初期化完了でtrueを返す。
 }
@@ -298,6 +301,19 @@ void Game::GenerateOutput()
 		255		// A
 	);
 	SDL_RenderFillRect(mRenderer, &ball);
+
+	// ゲームオーバー画面の表示
+	if (gameOver)
+	{
+		SDL_Rect r;
+		r.w = 800;
+		r.h = 400;
+		r.x = 100;
+		r.y = 100;
+		SDL_RenderCopyEx(mRenderer, gameOver, nullptr, &r, 0, nullptr, SDL_FLIP_NONE);
+	}
+
+
 
 	// 描画バッファの交換
 	SDL_RenderPresent(mRenderer);
