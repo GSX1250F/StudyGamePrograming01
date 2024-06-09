@@ -305,12 +305,12 @@ void Game::GenerateOutput()
 	// ゲームオーバー画面の表示
 	if (gameOverText)
 	{
-		SDL_Rect txtRect;
+		SDL_Rect r;
 		r.w = mWindowW;
 		r.h = mWindowH;
 		r.x = 0;
 		r.y = 0;
-		SDL_RenderCopy(mRenderer, gameOverText, nullptr, &r, 0, nullptr, SDL_FLIP_NONE);
+		SDL_RenderCopyEx(mRenderer, gameOverText, nullptr, &r, 0, nullptr, SDL_FLIP_NONE);
 	}
 
 
