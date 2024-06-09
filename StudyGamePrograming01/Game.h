@@ -43,4 +43,6 @@ private:
 	std::vector<Vector2> mTextSize;		// テキストサイズ
 	const int mFontSize = 100;	//テキストのフォントサイズ
 	int scene;	//0:ゲーム中 , 1:ポーズ中 , 2:ゲームオーバー
+	bool pause = false;	//true:ポーズ中
+	void ResetGame();
 };
