@@ -138,15 +138,50 @@ void Game::ProcessInput()
 			case SDL_QUIT:		// ユーザーがウィンドウを閉じようとした入力のイベント
 				mIsRunning = false;		//ゲームを終了するフラグ
 				break;
+			case SDL_KEYDOWN:	// キーが押されたとき
+				//mPaddleDir = 0;		//パドル方向を初期化
+				switch (event.key.keysym.sym)
+				{
+				case SDLK_ESCAPE:
+					mIsRunning = false;		//ゲームを終了するフラグ
+					break;
+				case SDLK_UP:
+					if (event.key.repeat)	// 押したままのとき
+					{
+						mPaddleDir = -1;		//上方向はy座標を減らす方向
+					}
+					break;
+				case SDLK_DOWN:
+					if (event.key.repeat)	// 押したままのとき
+					{
+						mPaddleDir = 1;		//上方向はy座標を減らす方向
+					}
+					break;
+				case SDLK_s:
+					if (!event.key.repeat &&		// 押してから離されたとき
+						scene == 0)
+					{
+						scene = 1;
+					}
+					break;
+				case SDLK_r:
+					if (scene == 2)
+					{
+						scene = 0;
+					}
+					break;
+				}
 		}
 	}
 
 	// キーボードの状態を取得
+	/*
 	const Uint8* state = SDL_GetKeyboardState(NULL);
 	if (state[SDL_SCANCODE_ESCAPE])		//ESCキーが押されたとき
 	{
 		mIsRunning = false;		//ゲームを終了するフラグ
 	}
+	
 
 	// ↑↓キーでパドルの方向を決定
 	mPaddleDir = 0;		//方向を初期化
@@ -170,7 +205,7 @@ void Game::ProcessInput()
 				break;
 		}
 	}
-
+	*/
 
 }
 
