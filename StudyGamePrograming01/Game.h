@@ -39,6 +39,8 @@ private:
 	const int mWindowH = 768;	//ウィンドウの縦幅
 	SDL_Texture* paddleImage;	// パドルのテクスチャ
 	std::vector<SDL_Texture*> mText;		// テキスト表示用
-	std::vector<Vector2> mTextOffset;		// テキスト表示のオフセット（改行につかう）
-	const int mFontSize = 150;	//テキストのフォントサイズ
+	std::vector<Vector2> mTextPos;		// テキスト表示位置（改行につかう）
+	std::vector<Vector2> mTextSize;		// テキストサイズ
+	const int mFontSize = 100;	//テキストのフォントサイズ
+	int scene;	//0:ゲーム中 , 1:ポーズ中 , 2:ゲームオーバー
 };

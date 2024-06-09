@@ -20,7 +20,7 @@ bool Game::Initialize()
 {
 	//SDLを初期化
 	int sdlResult = SDL_Init(SDL_INIT_VIDEO);	//ビデオサブシステムの初期化。返り値は整数。返り値が0でないときは初期化失敗
-	
+
 	if (sdlResult != 0)
 	{
 		SDL_Log("SDLの初期化に失敗しました: %s", SDL_GetError());
@@ -36,7 +36,7 @@ bool Game::Initialize()
 		mWindowH,	// windowの縦幅
 		0		// フラグ (0 は何もセットしない)
 	);
-	
+
 	if (!mWindow)
 	{
 		SDL_Log("window作成に失敗しました: %s", SDL_GetError());
@@ -82,32 +82,36 @@ bool Game::Initialize()
 	SDL_FreeSurface(surf);
 
 	// テキスト表示を用意
-	if (TTF_Init()<0) 
+	if (TTF_Init() < 0)
 	{
 		SDL_Log("TTFの初期化に失敗しました %s", filename.c_str());
 		return false;
 	}
-	
 	TTF_Font* font = TTF_OpenFont("Assets/PixelMplus10-Regular.ttf", mFontSize);	// フォントファイルの読み込みとサイズ設定
 	// ポーズのテキスト
 	surf = TTF_RenderUTF8_Blended(font, "Press S to Pause", { 255,255,255,255 });
 	mText.push_back(SDL_CreateTextureFromSurface(mRenderer, surf));		//mText[0]がポーズのテキスト
 	int iw, ih;
-	SDL_QueryTexture(mText[0], NULL, NULL, &iw, &ih);	//文字を描写したTextureのサイズを取得する      
-	mTextOffset.push_back(Vector2{ mWindowW / 2.0f - iw / 2.0f, mWindowH / 2.0f });
+	SDL_QueryTexture(mText[0], NULL, NULL, &iw, &ih);	//文字を描写したTextureのサイズを取得する
+	mTextSize.push_back(Vector2{iw*1.0f, ih*1.0f});		//mTextSize[0]がポーズのテキストサイズ
+	mTextPos.push_back(Vector2{ mWindowW / 2.0f - iw / 2.0f, mWindowH / 2.0f - ih / 2.0f });		//mTextOffset[0]がポーズのテキスト表示位置
 	SDL_FreeSurface(surf);
 	// GameOverのテキスト
 	surf = TTF_RenderUTF8_Blended(font, "Game Over", {255,255,255,255});
-	mText.push_back(SDL_CreateTextureFromSurface(mRenderer, surf));		//mText[1]がGameOverのテキスト
+	mText.push_back(SDL_CreateTextureFromSurface(mRenderer, surf));	
 	SDL_QueryTexture(mText[1], NULL, NULL, &iw, &ih);
-	mTextOffset.push_back(Vector2{ mWindowW / 2.0f - iw / 2.0f, mWindowH / 2.0f });
+	mTextSize.push_back(Vector2{ iw * 1.0f, ih * 1.0f });
+	mTextPos.push_back(Vector2{ mWindowW / 2.0f - iw / 2.0f, mWindowH / 2.0f - ih });
 	SDL_FreeSurface(surf);
 	// リスタートのテキスト
 	surf = TTF_RenderUTF8_Blended(font, "Press R to restart", { 255,255,255,255 });
-	mText.push_back(SDL_CreateTextureFromSurface(mRenderer, surf));		//mText[2]がGameOverのテキスト
+	mText.push_back(SDL_CreateTextureFromSurface(mRenderer, surf));
 	SDL_QueryTexture(mText[2], NULL, NULL, &iw, &ih);
-	mTextOffset.push_back(Vector2{ mWindowW / 2.0f - iw / 2.0f, mWindowH / 2.0f + mFontSize});
+	mTextSize.push_back(Vector2{ iw * 1.0f, ih * 1.0f });
+	mTextPos.push_back(Vector2{ mWindowW / 2.0f - iw / 2.0f, mWindowH / 2.0f - ih + mFontSize});
 	SDL_FreeSurface(surf);
+
+	scene = 0;
 
 	return true;	//初期化完了でtrueを返す。
 }
@@ -154,6 +158,20 @@ void Game::ProcessInput()
 	{
 		mPaddleDir += 1;		//下方向はy座標を増やす方向
 	}
+	if (state[SDL_SCANCODE_S])
+	{
+		switch (scene)
+		{
+			case 0:
+				scene = 1;
+				break;
+			case 1:
+				scene = 0;
+				break;
+		}
+	}
+
+
 }
 
 void Game::UpdateGame()
@@ -174,60 +192,62 @@ void Game::UpdateGame()
 	// 次のフレームのためtick countsを更新
 	mTicksCount = SDL_GetTicks();
 
+	if (scene == 0) 
+	{
 		// パドル位置の更新
-	// Update paddle position based on direction
-	if (mPaddleDir != 0)
-	{
-		mPaddlePos.y += mPaddleDir * 300.0f * deltaTime;	//パドルのY座標を、300ピクセル/秒だけ増減
-		// Make sure paddle doesn't move off screen!
-		if (mPaddlePos.y < (paddleH / 2.0f + thickness))
+		if (mPaddleDir != 0)
 		{
-			mPaddlePos.y = paddleH / 2.0f + thickness;
+			mPaddlePos.y += mPaddleDir * 300.0f * deltaTime;	//パドルのY座標を、300ピクセル/秒だけ増減
+			if (mPaddlePos.y < (paddleH / 2.0f + thickness))
+			{
+				mPaddlePos.y = paddleH / 2.0f + thickness;
+			}
+			else if (mPaddlePos.y > (mWindowH - paddleH / 2.0f - thickness))
+			{
+				mPaddlePos.y = mWindowH - paddleH / 2.0f - thickness;
+			}
 		}
-		else if (mPaddlePos.y > (mWindowH - paddleH / 2.0f - thickness))
+
+		// ボール位置の更新
+		// 位置 += 速さ*deltaTime
+		mBallPos.x += mBallVel.x * deltaTime;
+		mBallPos.y += mBallVel.y * deltaTime;
+
+		// パドルでボールを反射。
+		float diff = mPaddlePos.y - mBallPos.y;
+		diff = (diff > 0.0f) ? diff : -diff;		//絶対値にする
+		if (
+
+			diff <= paddleH / 2.0f &&		// y座標の差が十分に小さく
+			mBallPos.x <= mPaddlePos.x + thickness && mBallPos.x >= mPaddlePos.x + thickness / 2.0f &&		// ボールのx座標がパドルの範囲内にあり
+			mBallVel.x < 0.0f)		// ボールが左向きに動いている
 		{
-			mPaddlePos.y = mWindowH - paddleH / 2.0f - thickness;
+			mBallVel.x *= -1.1f;		// ボールスピードアップ
+		}
+		// ボールが左端にいってしまったらゲームオーバー。
+		else if (mBallPos.x <= 0.0f)
+		{
+			scene = 2;
+		}
+		// ボールが右壁に当たったら反射
+		else if (mBallPos.x >= (mWindowW - thickness) && mBallVel.x > 0.0f)
+		{
+			mBallVel.x *= -1.0f;
+		}
+
+		// ボールが上壁に当たったら反射
+		if (mBallPos.y <= thickness && mBallVel.y < 0.0f)
+		{
+			mBallVel.y *= -1;
+		}
+		// ボールが下壁に当たったら反射
+		else if (mBallPos.y >= (mWindowH - thickness) &&
+			mBallVel.y > 0.0f)
+		{
+			mBallVel.y *= -1;
 		}
 	}
-
-	// ボール位置の更新
-	// 位置 += 速さ*deltaTime
-	mBallPos.x += mBallVel.x * deltaTime;
-	mBallPos.y += mBallVel.y * deltaTime;
-
-	// パドルでボールを反射。
-	float diff = mPaddlePos.y - mBallPos.y;
-	diff = (diff > 0.0f) ? diff : -diff;		//絶対値にする
-	if (
-		
-		diff <= paddleH / 2.0f &&		// y座標の差が十分に小さく
-		mBallPos.x <= mPaddlePos.x + thickness && mBallPos.x >= mPaddlePos.x + thickness / 2.0f &&		// ボールのx座標がパドルの範囲内にあり
-		mBallVel.x < 0.0f)		// ボールが左向きに動いている
-	{
-		mBallVel.x *= -1.1f;		// ボールスピードアップ
-	}
-	// ボールが左端にいってしまったらゲームオーバー。
-	else if (mBallPos.x <= 0.0f)
-	{
-		mIsRunning = false;
-	}
-	// ボールが右壁に当たったら反射
-	else if (mBallPos.x >= (mWindowW - thickness) && mBallVel.x > 0.0f)
-	{
-		mBallVel.x *= -1.0f;
-	}
-
-	// ボールが上壁に当たったら反射
-	if (mBallPos.y <= thickness && mBallVel.y < 0.0f)
-	{
-		mBallVel.y *= -1;
-	}
-	// ボールが下壁に当たったら反射
-	else if (mBallPos.y >= (mWindowH - thickness) &&
-		mBallVel.y > 0.0f)
-	{
-		mBallVel.y *= -1;
-	}
+	
 }
 
 void Game::GenerateOutput()
@@ -313,12 +333,14 @@ void Game::GenerateOutput()
 	SDL_RenderFillRect(mRenderer, &ball);
 
 	// テキスト表示
-	SDL_Rect txtRect = {0,0,mWindowW,mWindowH};
-	SDL_Rect pasteRect = { (mWindowW - iw) / 2 ,(mWindowH - ih) / 2,iw,ih};
-	//Textureを描写する      
-	//描写元の描写する部分,描写先の描写する部分)      
-	//サイズが違うと勝手にTextureを伸展してくれる      
-	SDL_RenderCopy(mRenderer, gameOverText, &txtRect, &pasteRect);
+	for (int i = 0; i < mText.size(); i++) {
+		SDL_Rect txtRect = { 0,0,static_cast<int>(mTextSize[i].x),static_cast<int>(mTextSize[i].y)};
+		SDL_Rect pasteRect = { static_cast<int>(mTextPos[i].x),static_cast<int>(mTextPos[i].y),static_cast<int>(mTextSize[i].x),static_cast<int>(mTextSize[i].y) };
+		//Textureを描写する      
+		//描写元の描写する部分,描写先の描写する部分)      
+		//サイズが違うと勝手にTextureを伸展してくれる      
+		SDL_RenderCopy(mRenderer, mText[i], &txtRect, &pasteRect);
+	}
 	
 
 
