@@ -81,22 +81,32 @@ bool Game::Initialize()
 	}
 	SDL_FreeSurface(surf);
 
-	// ゲームオーバー画面を用意
+	// テキスト表示を用意
 	if (TTF_Init()<0) 
 	{
 		SDL_Log("TTFの初期化に失敗しました %s", filename.c_str());
 		return false;
 	}
 	
-	TTF_Font* font = TTF_OpenFont("Assets/PixelMplus10-Regular.ttf", 24);
-	auto string_color = SDL_Color();
-	string_color.r = 255;
-	string_color.g = 255;
-	string_color.b = 255;
-	string_color.a = 255;
-	surf = TTF_RenderUTF8_Blended(font, "Game Over /n", string_color);
-	gameOverText = SDL_CreateTextureFromSurface(mRenderer, surf);
-
+	TTF_Font* font = TTF_OpenFont("Assets/PixelMplus10-Regular.ttf", mFontSize);	// フォントファイルの読み込みとサイズ設定
+	// ポーズのテキスト
+	surf = TTF_RenderUTF8_Blended(font, "Press S to Pause", { 255,255,255,255 });
+	mText.push_back(SDL_CreateTextureFromSurface(mRenderer, surf));		//mText[0]がポーズのテキスト
+	int iw, ih;
+	SDL_QueryTexture(mText[0], NULL, NULL, &iw, &ih);	//文字を描写したTextureのサイズを取得する      
+	mTextOffset.push_back(Vector2{ mWindowW / 2.0f - iw / 2.0f, mWindowH / 2.0f });
+	SDL_FreeSurface(surf);
+	// GameOverのテキスト
+	surf = TTF_RenderUTF8_Blended(font, "Game Over", {255,255,255,255});
+	mText.push_back(SDL_CreateTextureFromSurface(mRenderer, surf));		//mText[1]がGameOverのテキスト
+	SDL_QueryTexture(mText[1], NULL, NULL, &iw, &ih);
+	mTextOffset.push_back(Vector2{ mWindowW / 2.0f - iw / 2.0f, mWindowH / 2.0f });
+	SDL_FreeSurface(surf);
+	// リスタートのテキスト
+	surf = TTF_RenderUTF8_Blended(font, "Press R to restart", { 255,255,255,255 });
+	mText.push_back(SDL_CreateTextureFromSurface(mRenderer, surf));		//mText[2]がGameOverのテキスト
+	SDL_QueryTexture(mText[2], NULL, NULL, &iw, &ih);
+	mTextOffset.push_back(Vector2{ mWindowW / 2.0f - iw / 2.0f, mWindowH / 2.0f + mFontSize});
 	SDL_FreeSurface(surf);
 
 	return true;	//初期化完了でtrueを返す。
@@ -302,16 +312,14 @@ void Game::GenerateOutput()
 	);
 	SDL_RenderFillRect(mRenderer, &ball);
 
-	// ゲームオーバー画面の表示
-	if (gameOverText)
-	{
-		SDL_Rect r;
-		r.w = mWindowW;
-		r.h = mWindowH;
-		r.x = 0;
-		r.y = 0;
-		SDL_RenderCopyEx(mRenderer, gameOverText, nullptr, &r, 0, nullptr, SDL_FLIP_NONE);
-	}
+	// テキスト表示
+	SDL_Rect txtRect = {0,0,mWindowW,mWindowH};
+	SDL_Rect pasteRect = { (mWindowW - iw) / 2 ,(mWindowH - ih) / 2,iw,ih};
+	//Textureを描写する      
+	//描写元の描写する部分,描写先の描写する部分)      
+	//サイズが違うと勝手にTextureを伸展してくれる      
+	SDL_RenderCopy(mRenderer, gameOverText, &txtRect, &pasteRect);
+	
 
 
 

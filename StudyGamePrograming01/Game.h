@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <vector>
 #include "SDL.h"
+#include <vector>
 
 struct Vector2
 {
@@ -37,6 +38,7 @@ private:
 	const int mWindowW = 1024;	//ウィンドウの横幅
 	const int mWindowH = 768;	//ウィンドウの縦幅
 	SDL_Texture* paddleImage;	// パドルのテクスチャ
-	SDL_Texture* gameOverText;		// ゲームオーバーのテキスト表示用
-
+	std::vector<SDL_Texture*> mText;		// テキスト表示用
+	std::vector<Vector2> mTextOffset;		// テキスト表示のオフセット（改行につかう）
+	const int mFontSize = 150;	//テキストのフォントサイズ
 };
