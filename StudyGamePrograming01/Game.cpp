@@ -1,26 +1,20 @@
 #include "Game.h"
 #include <SDL.h>
 #include <SDL_image.h>
-#include <SDL_ttf.h>
 #include <string>
-
-
+#include <SDL_ttf.h>
 
 Game::Game()
 	:mWindow(nullptr)
+	, mIsRunning(true)
 	, mRenderer(nullptr)
 	, mTicksCount(0)
-	, mIsRunning(true)
-	
-{	
-
-}
+{}
 
 bool Game::Initialize()
 {
 	//SDLを初期化
-	int sdlResult = SDL_Init(SDL_INIT_VIDEO);	//ビデオサブシステムの初期化。返り値は整数。返り値が0でないときは初期化失敗
-
+	int sdlResult = SDL_Init(SDL_INIT_VIDEO);	//ビデオサブシステムの初期化。
 	if (sdlResult != 0)
 	{
 		SDL_Log("SDLの初期化に失敗しました: %s", SDL_GetError());
@@ -36,7 +30,6 @@ bool Game::Initialize()
 		mWindowH,	// windowの縦幅
 		0		// フラグ (0 は何もセットしない)
 	);
-
 	if (!mWindow)
 	{
 		SDL_Log("window作成に失敗しました: %s", SDL_GetError());
@@ -44,11 +37,7 @@ bool Game::Initialize()
 	}
 
 	// SDLレンダラーを作成
-	mRenderer = SDL_CreateRenderer(
-		mWindow, // レンダラーの対象
-		-1,		 // 通常は -1
-		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
-	);
+	mRenderer = SDL_CreateRenderer(mWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
 	if (!mRenderer)
 	{
@@ -57,21 +46,21 @@ bool Game::Initialize()
 	}
 
 	// パドルのスプライト用画像を読み込み
-	paddleImage = nullptr;
-	std::string filename = "Assets/paddle.png";
-	SDL_Surface* surf = IMG_Load(filename.c_str());
+	paddleImage = nullptr;		//テクスチャ用ポインタ変数を初期化
+	std::string filename = "Assets/paddle.png";		//ファイル名（パス含む）
+	SDL_Surface* surf = IMG_Load(filename.c_str());		//サーフェイスに画像を読み込む
 	if (!surf)
 	{
 		SDL_Log("テクスチャファイルの読み込みに失敗しました %s", filename.c_str());
 		return false;
 	}
-	paddleImage = SDL_CreateTextureFromSurface(mRenderer, surf);
+	paddleImage = SDL_CreateTextureFromSurface(mRenderer, surf);	//サーフェイスからテクスチャを作成
 	if (!paddleImage)
 	{
 		SDL_Log("サーフェイスからテクスチャの作成に失敗しました %s", filename.c_str());
 		return false;
 	}
-	SDL_FreeSurface(surf);
+	SDL_FreeSurface(surf);	//サーフェイスをクリアする。
 
 	// テキスト表示を用意
 	if (TTF_Init() < 0)
@@ -85,12 +74,12 @@ bool Game::Initialize()
 	mText.push_back(SDL_CreateTextureFromSurface(mRenderer, surf));		//mText[0]がポーズのテキスト
 	int iw, ih;
 	SDL_QueryTexture(mText[0], NULL, NULL, &iw, &ih);	//文字を描写したTextureのサイズを取得する
-	mTextSize.push_back(Vector2{iw*1.0f, ih*1.0f});		//mTextSize[0]がポーズのテキストサイズ
+	mTextSize.push_back(Vector2{ iw * 1.0f, ih * 1.0f });		//mTextSize[0]がポーズのテキストサイズ
 	mTextPos.push_back(Vector2{ mWindowW / 2.0f - iw / 2.0f, mWindowH / 2.0f - ih / 2.0f });		//mTextOffset[0]がポーズのテキスト表示位置
 	SDL_FreeSurface(surf);
 	// GameOverのテキスト
-	surf = TTF_RenderUTF8_Blended(font, "Game Over", {255,255,255,255});
-	mText.push_back(SDL_CreateTextureFromSurface(mRenderer, surf));	
+	surf = TTF_RenderUTF8_Blended(font, "Game Over", { 255,255,255,255 });
+	mText.push_back(SDL_CreateTextureFromSurface(mRenderer, surf));
 	SDL_QueryTexture(mText[1], NULL, NULL, &iw, &ih);
 	mTextSize.push_back(Vector2{ iw * 1.0f, ih * 1.0f });
 	mTextPos.push_back(Vector2{ mWindowW / 2.0f - iw / 2.0f, mWindowH / 2.0f - ih });
@@ -100,7 +89,7 @@ bool Game::Initialize()
 	mText.push_back(SDL_CreateTextureFromSurface(mRenderer, surf));
 	SDL_QueryTexture(mText[2], NULL, NULL, &iw, &ih);
 	mTextSize.push_back(Vector2{ iw * 1.0f, ih * 1.0f });
-	mTextPos.push_back(Vector2{ mWindowW / 2.0f - iw / 2.0f, mWindowH / 2.0f - ih + mFontSize});
+	mTextPos.push_back(Vector2{ mWindowW / 2.0f - iw / 2.0f, mWindowH / 2.0f - ih + mFontSize });
 	SDL_FreeSurface(surf);
 
 	ResetGame();
@@ -119,7 +108,7 @@ void Game::RunLoop()
 }
 
 void Game::ProcessInput()
-{	// 1フレームで発生したすべてのSDLイベントを配列に格納し、1つずつ読みだして実行。
+{
 	SDL_Event event;
 	while (SDL_PollEvent(&event))		// SDLキューにイベントがあればtrue
 	{
@@ -132,15 +121,13 @@ void Game::ProcessInput()
 		{
 			if (event.key.repeat)
 			{
-				// キーリピート中
-				switch (event.key.keysym.sym)
+				switch (event.key.keysym.sym)	// キーリピート中
 				{
 				}
 			}
 			else
 			{
-				// キーリピートされていないとき
-				switch (event.key.keysym.sym)
+				switch (event.key.keysym.sym)	// キーリピートされていないとき
 				{
 				case SDLK_ESCAPE:
 					mIsRunning = false;		//ゲームを終了するフラグ
@@ -167,25 +154,24 @@ void Game::ProcessInput()
 					break;
 				}
 			}
-			
+
 		}
 		if (event.type == SDL_KEYUP)	// キーが離されたら実行する
 		{
 			switch (event.key.keysym.sym)
 			{
-				case SDLK_UP :
-					mPaddleDir = 0;
-					break;
-				case SDLK_DOWN:
-					mPaddleDir = 0;
-					break;
-				case SDLK_s:
-					if (scene == 1)
-					{
-						pause = true;
-					}
-					break;
-				
+			case SDLK_UP:
+				mPaddleDir = 0;
+				break;
+			case SDLK_DOWN:
+				mPaddleDir = 0;
+				break;
+			case SDLK_s:
+				if (scene == 1)
+				{
+					pause = true;
+				}
+				break;
 			}
 		}
 	}
@@ -194,133 +180,85 @@ void Game::ProcessInput()
 void Game::UpdateGame()
 {
 	//ゲーム時間の更新、制限など	
-	//16ms経過までは待つ（フレーム制限）。約60fps
-	while (!SDL_TICKS_PASSED(SDL_GetTicks(), mTicksCount + 16));
+	while (!SDL_TICKS_PASSED(SDL_GetTicks(), mTicksCount + 16));	//16ms経過までは待つ（フレーム制限）。約60fps
+	float deltaTime = (SDL_GetTicks() - mTicksCount) / 1000.0f;		// deltaTimeを計算。単位は秒にする
+	if (deltaTime > 0.05f) { deltaTime = 0.05f; }		// 更新が遅すぎても最低のfpsを確保。50ms (20fps)
+	mTicksCount = SDL_GetTicks();		// 次のフレームのためtick countsを更新
 
-	// Delta timeを計算。単位は秒にする
-	float deltaTime = (SDL_GetTicks() - mTicksCount) / 1000.0f;
-
-	// 更新が遅すぎても最低のfpsを確保
-	if (deltaTime > 0.05f)
-	{
-		deltaTime = 0.05f;		//50ms (20fps)
-	}
-
-	// 次のフレームのためtick countsを更新
-	mTicksCount = SDL_GetTicks();
-
-	if (scene == 0) 
+	if (scene == 0)
 	{
 		// パドル位置の更新
 		if (mPaddleDir != 0)
 		{
-			mPaddlePos.y += mPaddleDir * 300.0f * deltaTime;	//パドルのY座標を、300ピクセル/秒だけ増減
-			if (mPaddlePos.y < (paddleH / 2.0f + thickness))
-			{
-				mPaddlePos.y = paddleH / 2.0f + thickness;
-			}
-			else if (mPaddlePos.y > (mWindowH - paddleH / 2.0f - thickness))
-			{
-				mPaddlePos.y = mWindowH - paddleH / 2.0f - thickness;
-			}
+			mPaddlePos.y += mPaddleDir * mPaddleSpeed * deltaTime;
+		}
+		if (mPaddlePos.y < (paddleH / 2.0f + thickness))
+		{
+			mPaddlePos.y = paddleH / 2.0f + thickness;
+		}
+		if (mPaddlePos.y > (mWindowH - paddleH / 2.0f - thickness))
+		{
+			mPaddlePos.y = mWindowH - paddleH / 2.0f - thickness;
 		}
 
 		// ボール位置の更新
-		// 位置 += 速さ*deltaTime
 		mBallPos.x += mBallVel.x * deltaTime;
 		mBallPos.y += mBallVel.y * deltaTime;
-
-		// パドルでボールを反射。
-		float diff = mPaddlePos.y - mBallPos.y;
-		diff = (diff > 0.0f) ? diff : -diff;		//絶対値にする
-		if (
-
-			diff <= paddleH / 2.0f &&		// y座標の差が十分に小さく
-			mBallPos.x <= mPaddlePos.x + thickness && mBallPos.x >= mPaddlePos.x + thickness / 2.0f &&		// ボールのx座標がパドルの範囲内にあり
-			mBallVel.x < 0.0f)		// ボールが左向きに動いている
-		{
-			mBallVel.x *= -1.1f;		// ボールスピードアップ
-		}
-		// ボールが左端にいってしまったらゲームオーバー。
-		else if (mBallPos.x <= 0.0f)
-		{
-			scene = 2;
-		}
-		// ボールが右壁に当たったら反射
-		else if (mBallPos.x >= (mWindowW - thickness) && mBallVel.x > 0.0f)
+		// ボールが壁に当たったら跳ね返る
+		if (mBallPos.x >= (mWindowW - thickness) && mBallVel.x > 0.0f)
 		{
 			mBallVel.x *= -1.0f;
 		}
-
-		// ボールが上壁に当たったら反射
 		if (mBallPos.y <= thickness && mBallVel.y < 0.0f)
 		{
-			mBallVel.y *= -1;
+			mBallVel.y *= -1.0f;
 		}
-		// ボールが下壁に当たったら反射
-		else if (mBallPos.y >= (mWindowH - thickness) &&
-			mBallVel.y > 0.0f)
+		if (mBallPos.y >= (mWindowH - thickness) && mBallVel.y > 0.0f)
 		{
-			mBallVel.y *= -1;
+			mBallVel.y *= -1.0f;
+		}
+		// パドルでボールが跳ね返る
+		float diff = mPaddlePos.y - mBallPos.y;
+		diff = (diff > 0.0f) ? diff : -diff;		//絶対値にする
+		if (diff <= paddleH / 2.0f &&		// y座標の差が十分に小さく
+			mBallPos.x <= mPaddlePos.x + thickness && mBallPos.x >= mPaddlePos.x + thickness / 2.0f &&		// ボールのx座標がパドルの範囲内にあり
+			mBallVel.x < 0.0f)		// ボールが左向きに動いている
+		{
+			mBallVel.x *= -1.0f;
+		}
+		// ボールが左端にいってしまったらゲームオーバー。
+		if (mBallPos.x <= 0.0f)
+		{
+			scene = 2;
 		}
 	}
+
 }
 
 void Game::GenerateOutput()
 {
-	//背景の色を設定
-	SDL_SetRenderDrawColor(
-		mRenderer,
-		50,		// R
-		50,		// G 
-		50,		// B
-		255		// A
-	);
-	// 背景を単色でクリア
-	SDL_RenderClear(mRenderer);
+	SDL_SetRenderDrawColor(mRenderer, 50, 50, 50, 255);		//背景の色を灰色に設定
+	SDL_RenderClear(mRenderer);		// 背景を単色でクリア
 
 	// 壁の描画
-	// 壁の色を設定
-	SDL_SetRenderDrawColor(mRenderer, 200, 200, 200, 255);
-	// 上側の壁を描画
-	// SDL_Rect : 長方形を作成
-	SDL_Rect wall{
-		0,			// Top left x
-		0,			// Top left y
-		mWindowW,	// Width
-		thickness	// Height
-	};
-	SDL_RenderFillRect(mRenderer, &wall);	//作成した長方形を描画（塗りつぶし）
-	// 下側の壁を描画
-	wall.y = mWindowH - thickness;		
-	SDL_RenderFillRect(mRenderer, &wall);	//作成した長方形を描画（塗りつぶし）	
-	// 右側の壁を描画
-	wall.x = mWindowW - thickness;
-	wall.y = 0;
-	wall.w = thickness;
-	wall.h = mWindowW;
+	SDL_SetRenderDrawColor(mRenderer, 200, 200, 200, 255);		// 壁の色を設定
+	SDL_Rect wall{ 0,0,mWindowW,thickness };		// 上側の壁
+	SDL_RenderFillRect(mRenderer, &wall);		//作成した長方形を描画（塗りつぶし）
+	wall = { 0,mWindowH - thickness,mWindowW,thickness };		// 下側の壁を描画
+	SDL_RenderFillRect(mRenderer, &wall);
+	wall = { mWindowW - thickness,0,thickness,mWindowW };		// 右側の壁
 	SDL_RenderFillRect(mRenderer, &wall);
 
-	if (scene == 0 || scene == 1)
+	if (scene == 0 || scene == 1)		// ゲーム実行中またはゲームポーズ中
 	{
-		// ゲーム実行中またはゲームポーズ中
-
 		// パドルを描画
-		/*
-		SDL_Rect paddle{
-			// static_cast演算子は、floatからintに変換する
+		/*SDL_Rect paddle{
 			static_cast<int>(mPaddlePos.x - thickness / 2.0f),
 			static_cast<int>(mPaddlePos.y - paddleH / 2.0f),
 			thickness,
 			static_cast<int>(paddleH)
 		};
-		SDL_SetRenderDrawColor(
-			mRenderer,
-			255,		// R
-			255,		// G
-			255,		// B
-			255			// A
-		);
+		SDL_SetRenderDrawColor(mRenderer,255,255,255,255);
 		SDL_RenderFillRect(mRenderer, &paddle);
 		*/
 		if (paddleImage)
@@ -330,36 +268,28 @@ void Game::GenerateOutput()
 			r.h = static_cast<int>(paddleH);
 			r.x = static_cast<int>(mPaddlePos.x - thickness / 2.0f);
 			r.y = static_cast<int>(mPaddlePos.y - paddleH / 2.0f);
-
 			SDL_RenderCopyEx(mRenderer, paddleImage, nullptr, &r, 0, nullptr, SDL_FLIP_NONE);
 		}
 
 		// ボールの描画
 		SDL_Rect ball{
-			// static_cast演算子は、floatからintに変換する
 			static_cast<int>(mBallPos.x - thickness / 2),
 			static_cast<int>(mBallPos.y - thickness / 2),
 			thickness,
 			thickness
 		};
-		SDL_SetRenderDrawColor(
-			mRenderer,
-			255,		// R
-			255,		// G 
-			255,		// B
-			255		// A
-		);
+		SDL_SetRenderDrawColor(mRenderer, 255, 255, 255, 255);
 		SDL_RenderFillRect(mRenderer, &ball);
 
 		// テキスト表示
 		SDL_Rect txtRect = { 0,0,static_cast<int>(mTextSize[0].x),static_cast<int>(mTextSize[0].y) };
 		SDL_Rect pasteRect = { static_cast<int>(mTextPos[0].x),static_cast<int>(mTextPos[0].y),static_cast<int>(mTextSize[0].x),static_cast<int>(mTextSize[0].y) };
 		SDL_RenderCopy(mRenderer, mText[0], &txtRect, &pasteRect);
-		}
+	}
 	else
 	{
 		// ゲームオーバー中
-		for (int i = 1; i <= 2;i++)
+		for (int i = 1; i <= 2; i++)
 		{
 			// テキスト表示
 			SDL_Rect txtRect = { 0,0,static_cast<int>(mTextSize[i].x),static_cast<int>(mTextSize[i].y) };
@@ -368,20 +298,17 @@ void Game::GenerateOutput()
 		}
 	}
 
-	// 描画バッファの交換
-	SDL_RenderPresent(mRenderer);
+	SDL_RenderPresent(mRenderer);		// 描画バッファの交換
 }
 
 void Game::ResetGame()
 {
 	// パドルとボール位置・速さ・方向をリセット
-	mPaddlePos.x = thickness * 2.0f;
-	mPaddlePos.y = mWindowH / 2.0f;
-	mBallPos.x = mWindowW / 2.0f;
-	mBallPos.y = mWindowH / 2.0f;
-	mBallVel.x = -200.0f;
-	mBallVel.y = 235.0f;
-	
+	mPaddlePos = Vector2{ thickness * 2.0f,mWindowH / 2.0f };
+	mPaddleDir = 0;
+	mPaddleSpeed = 200.0f;
+	mBallPos = Vector2{ mWindowW / 2.0f,mWindowH / 2.0f };
+	mBallVel = Vector2{ -200.0f,235.0f };
 	scene = 0;
 }
 
