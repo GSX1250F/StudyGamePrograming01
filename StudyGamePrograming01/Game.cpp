@@ -3,6 +3,8 @@
 #include <SDL_image.h>
 #include <string>
 #include <SDL_ttf.h>
+#include "Random.hpp"
+#include <math.h>
 
 Game::Game()
 	:mWindow(nullptr)
@@ -224,7 +226,7 @@ void Game::UpdateGame()
 			mBallPos.x <= mPaddlePos.x + thickness && mBallPos.x >= mPaddlePos.x + thickness / 2.0f &&		// ボールのx座標がパドルの範囲内にあり
 			mBallVel.x < 0.0f)		// ボールが左向きに動いている
 		{
-			mBallVel.x *= -1.0f;
+			mBallVel.x *= -1.1f;	// 横方向ボールスピードup
 		}
 		// ボールが左端にいってしまったらゲームオーバー。
 		if (mBallPos.x <= 0.0f)
@@ -308,7 +310,14 @@ void Game::ResetGame()
 	mPaddleDir = 0;
 	mPaddleSpeed = 200.0f;
 	mBallPos = Vector2{ mWindowW / 2.0f,mWindowH / 2.0f };
-	mBallVel = Vector2{ -200.0f,235.0f };
+	//mBallVel = Vector2{ -200.0f,235.0f };
+	int angle = 1.0f * rnd(15, 75);	// 15～75の範囲の乱数を取得
+	int pmx = 2 * rnd(0, 1) - 1;	// -1 , 1 のどちらかを乱数で取得
+	int pmy = 2 * rnd(0, 1) - 1;	// -1 , 1 のどちらかを乱数で取得
+	float velx = 1.0f * pmx * mWindowH * 0.4f * cos(angle / 180.0f * M_PI);
+	float vely = 1.0f * pmy * mWindowH * 0.4f * sin(angle / 180.0f * M_PI);
+	mBallVel = Vector2{velx , vely};
+
 	scene = 0;
 }
 
