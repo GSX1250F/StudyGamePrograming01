@@ -125,6 +125,12 @@ void Game::ProcessInput()
 			{
 				switch (event.key.keysym.sym)	// キーリピート中
 				{
+				case SDLK_UP:
+					mPaddleDir = -1;
+					break;
+				case SDLK_DOWN:
+					mPaddleDir = 1;
+					break;
 				}
 			}
 			else
