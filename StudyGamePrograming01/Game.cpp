@@ -180,10 +180,7 @@ void Game::UpdateGame()
 	if (scene == 0)
 	{
 		// パドル位置の更新
-		if (mPaddleDir != 0)
-		{
-			mPaddlePos.y += mPaddleDir * mPaddleSpeed * deltaTime;
-		}
+		mPaddlePos.y += mPaddleDir * mPaddleSpeed * deltaTime;
 		if (mPaddlePos.y < (paddleH / 2.0f + thickness))
 		{
 			mPaddlePos.y = paddleH / 2.0f + thickness;
@@ -208,7 +205,7 @@ void Game::UpdateGame()
 			mBallVel.y *= -1.0f;
 			mBallPosPost.y = thickness + thickness * 0.5f;
 		}
-		if (mBallPosPost.y + thickness * 0.5f >= (mWindowH - thickness) && mBallVel.y > 0.0f)
+		if (mBallPosPost.y + thickness * 0.5f >= mWindowH - thickness && mBallVel.y > 0.0f)
 		{
 			mBallVel.y *= -1.0f;
 			mBallPosPost.y = mWindowH - thickness - thickness * 0.5f;
@@ -258,6 +255,7 @@ void Game::GenerateOutput()
 	if (scene == 0 || scene == 1)		// ゲーム実行中またはゲームポーズ中
 	{
 		// パドルを描画
+		/*
 		SDL_Rect paddle{
 			static_cast<int>(mPaddlePos.x - thickness / 2.0f),
 			static_cast<int>(mPaddlePos.y - paddleH / 2.0f),
@@ -266,8 +264,7 @@ void Game::GenerateOutput()
 		};
 		SDL_SetRenderDrawColor(mRenderer,255,255,255,255);
 		SDL_RenderFillRect(mRenderer, &paddle);
-		
-		/*
+		*/
 		if (paddleImage)
 		{
 			SDL_Rect r;
@@ -277,7 +274,6 @@ void Game::GenerateOutput()
 			r.y = static_cast<int>(mPaddlePos.y - paddleH / 2.0f);
 			SDL_RenderCopyEx(mRenderer, paddleImage, nullptr, &r, 0, nullptr, SDL_FLIP_NONE);
 		}
-		*/
 		// ボールの描画
 		SDL_Rect ball{
 			static_cast<int>(mBallPos.x - thickness / 2),
