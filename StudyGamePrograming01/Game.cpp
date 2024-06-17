@@ -193,36 +193,50 @@ void Game::UpdateGame()
 			mPaddlePos.y = mWindowH - paddleH / 2.0f - thickness;
 		}
 
-		// ボール位置の更新
-		mBallPos.x += mBallVel.x * deltaTime;
-		mBallPos.y += mBallVel.y * deltaTime;
+		// 更新後のボール位置を計算
+		Vector2 mBallPosPost;
+		mBallPosPost.x = mBallPos.x + mBallVel.x * deltaTime;
+		mBallPosPost.y = mBallPos.y + mBallVel.y * deltaTime;
 		// ボールが壁に当たったら跳ね返る
-		if (mBallPos.x >= (mWindowW - thickness) && mBallVel.x > 0.0f)
+		if (mBallPosPost.x + thickness * 0.5f >= (mWindowW - thickness) && mBallVel.x > 0.0f)
 		{
 			mBallVel.x *= -1.0f;
+			mBallPosPost.x = mWindowW - thickness - thickness * 0.5f;
 		}
-		if (mBallPos.y <= thickness && mBallVel.y < 0.0f)
+		if (mBallPosPost.y - thickness * 0.5f <= thickness && mBallVel.y < 0.0f)
 		{
 			mBallVel.y *= -1.0f;
+			mBallPosPost.y = thickness + thickness * 0.5f;
 		}
-		if (mBallPos.y >= (mWindowH - thickness) && mBallVel.y > 0.0f)
+		if (mBallPosPost.y + thickness * 0.5f >= (mWindowH - thickness) && mBallVel.y > 0.0f)
 		{
 			mBallVel.y *= -1.0f;
+			mBallPosPost.y = mWindowH - thickness - thickness * 0.5f;
 		}
-		// パドルでボールが跳ね返る
-		float diff = mPaddlePos.y - mBallPos.y;
-		diff = (diff > 0.0f) ? diff : -diff;		//絶対値にする
-		if (diff <= paddleH / 2.0f &&		// y座標の差が十分に小さく
-			mBallPos.x <= mPaddlePos.x + thickness && mBallPos.x >= mPaddlePos.x - thickness &&		// ボールのx座標がパドルの範囲内にあり
-			mBallVel.x < 0.0f)		// ボールが左向きに動いている
+		// パドルでボールが跳ね返る判定
+		// 更新後のボール左端がパドル右端より小さく、ボールが左向きであるときに、
+		// ボール更新前と更新後の直線を求め、パドルのx座標でのy座標がパドル範囲内であるか
+		if (mBallPosPost.x < mPaddlePos.x + thickness && mBallVel.x < 0.0f)
 		{
-			mBallVel.x *= -1.1f;	// 横方向ボールスピードup
+			float intersection_y = (mBallPos.y - mBallPosPost.y) / (mBallPos.x - mBallPosPost.x) * (mPaddlePos.x - mBallPosPost.x) + mBallPosPost.y;
+			if (intersection_y >= mPaddlePos.y - paddleH * 0.5f && intersection_y <= mPaddlePos.y + paddleH * 0.5f)
+			{
+				mBallVel.x *= -1.1f;	// 横方向ボールスピードup
+				if (mBallVel.x < -2500.0f) { mBallVel.x = -2500.0f; }
+				if (mBallVel.x > 2500.0f) { mBallVel.x = 2500.0f; }
+				mBallPosPost.x = mPaddlePos.x + thickness;
+			}
 		}
+		// ボール位置を更新
+		mBallPos.x = mBallPosPost.x;
+		mBallPos.y = mBallPosPost.y;
+		
 		// ボールが左端にいってしまったらゲームオーバー。
 		if (mBallPos.x <= 0.0f)
 		{
 			scene = 2;
 		}
+
 	}
 
 }
@@ -238,13 +252,13 @@ void Game::GenerateOutput()
 	SDL_RenderFillRect(mRenderer, &wall);		//作成した長方形を描画（塗りつぶし）
 	wall = { 0,mWindowH - thickness,mWindowW,thickness };		// 下側の壁を描画
 	SDL_RenderFillRect(mRenderer, &wall);
-	wall = { mWindowW - thickness,0,thickness,mWindowW };		// 右側の壁
+	wall = { mWindowW - thickness,0,thickness,mWindowH };		// 右側の壁
 	SDL_RenderFillRect(mRenderer, &wall);
 
 	if (scene == 0 || scene == 1)		// ゲーム実行中またはゲームポーズ中
 	{
 		// パドルを描画
-		/*SDL_Rect paddle{
+		SDL_Rect paddle{
 			static_cast<int>(mPaddlePos.x - thickness / 2.0f),
 			static_cast<int>(mPaddlePos.y - paddleH / 2.0f),
 			thickness,
@@ -252,7 +266,8 @@ void Game::GenerateOutput()
 		};
 		SDL_SetRenderDrawColor(mRenderer,255,255,255,255);
 		SDL_RenderFillRect(mRenderer, &paddle);
-		*/
+		
+		/*
 		if (paddleImage)
 		{
 			SDL_Rect r;
@@ -262,7 +277,7 @@ void Game::GenerateOutput()
 			r.y = static_cast<int>(mPaddlePos.y - paddleH / 2.0f);
 			SDL_RenderCopyEx(mRenderer, paddleImage, nullptr, &r, 0, nullptr, SDL_FLIP_NONE);
 		}
-
+		*/
 		// ボールの描画
 		SDL_Rect ball{
 			static_cast<int>(mBallPos.x - thickness / 2),
