@@ -121,65 +121,49 @@ void Game::ProcessInput()
 		}
 		if (event.type == SDL_KEYDOWN)	// キーが押されたら実行する
 		{
-			if (event.key.repeat)
+			if (event.key.keysym.sym == SDLK_ESCAPE)
 			{
-				switch (event.key.keysym.sym)	// キーリピート中
+				mIsRunning = false;		//ゲームを終了するフラグ
+			}
+			if (event.key.keysym.sym == SDLK_UP)
+			{
+				mPaddleDir -= 1;
+				if (mPaddleDir < -1) { mPaddleDir = -1; }
+			}
+			if (event.key.keysym.sym == SDLK_DOWN)
+			{
+				mPaddleDir += 1;
+				if (mPaddleDir > 1) { mPaddleDir = 1; }
+			}
+			if (event.key.keysym.sym == SDLK_s && !event.key.repeat)
+			{
+				if (scene == 0 && pause == false)
 				{
-				case SDLK_UP:
-					mPaddleDir = -1;
-					break;
-				case SDLK_DOWN:
-					mPaddleDir = 1;
-					break;
+					scene = 1;
+				}
+				if (scene == 1 && pause == true)
+				{
+					scene = 0;
+					pause = false;
 				}
 			}
-			else
+			if (event.key.keysym.sym == SDLK_r)
 			{
-				switch (event.key.keysym.sym)	// キーリピートされていないとき
-				{
-				case SDLK_ESCAPE:
-					mIsRunning = false;		//ゲームを終了するフラグ
-					break;
-				case SDLK_UP:
-					mPaddleDir = -1;
-					break;
-				case SDLK_DOWN:
-					mPaddleDir = 1;
-					break;
-				case SDLK_s:
-					if (scene == 0 && pause == false)
-					{
-						scene = 1;
-					}
-					if (scene == 1 && pause == true)
-					{
-						scene = 0;
-						pause = false;
-					}
-					break;
-				case SDLK_r:
-					if (scene == 2) { ResetGame(); }
-					break;
-				}
+				if (scene == 2) { ResetGame(); }
 			}
-
+		}
+		else    // 何も操作していないとき
+		{
+			mPaddleDir = 0;
 		}
 		if (event.type == SDL_KEYUP)	// キーが離されたら実行する
 		{
-			switch (event.key.keysym.sym)
+			if (event.key.keysym.sym == SDLK_s)
 			{
-			case SDLK_UP:
-				mPaddleDir = 0;
-				break;
-			case SDLK_DOWN:
-				mPaddleDir = 0;
-				break;
-			case SDLK_s:
 				if (scene == 1)
 				{
 					pause = true;
 				}
-				break;
 			}
 		}
 	}
@@ -229,7 +213,7 @@ void Game::UpdateGame()
 		float diff = mPaddlePos.y - mBallPos.y;
 		diff = (diff > 0.0f) ? diff : -diff;		//絶対値にする
 		if (diff <= paddleH / 2.0f &&		// y座標の差が十分に小さく
-			mBallPos.x <= mPaddlePos.x + thickness && mBallPos.x >= mPaddlePos.x + thickness / 2.0f &&		// ボールのx座標がパドルの範囲内にあり
+			mBallPos.x <= mPaddlePos.x + thickness && mBallPos.x >= mPaddlePos.x - thickness &&		// ボールのx座標がパドルの範囲内にあり
 			mBallVel.x < 0.0f)		// ボールが左向きに動いている
 		{
 			mBallVel.x *= -1.1f;	// 横方向ボールスピードup
