@@ -16,8 +16,8 @@ Game::Game()
 bool Game::Initialize()
 {
 	//SDLを初期化
-	int sdlResult = SDL_Init(SDL_INIT_VIDEO);	//ビデオサブシステムの初期化。
-	if (sdlResult != 0)
+	//ビデオサブシステムの初期化。
+	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 	{
 		SDL_Log("SDLの初期化に失敗しました: %s", SDL_GetError());
 		return false;
