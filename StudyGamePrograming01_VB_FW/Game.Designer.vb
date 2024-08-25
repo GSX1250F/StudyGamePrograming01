@@ -37,6 +37,9 @@ Partial Class Game
         Me.PictureBox.TabIndex = 0
         Me.PictureBox.TabStop = False
         '
+        'RunLoop
+        '
+        '
         'Game
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 12.0!)
@@ -44,7 +47,7 @@ Partial Class Game
         Me.ClientSize = New System.Drawing.Size(800, 450)
         Me.Controls.Add(Me.PictureBox)
         Me.Name = "Game"
-        Me.Text = "Form1"
+        Me.Text = "StudyGamePrograming VB(Framework)"
         CType(Me.PictureBox, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
 
