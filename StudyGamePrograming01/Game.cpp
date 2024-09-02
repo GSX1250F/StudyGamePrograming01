@@ -5,6 +5,8 @@
 #include <SDL_ttf.h>
 #include "Random.hpp"
 #include <math.h>
+#include <thread>
+#include <chrono>
 
 Game::Game()
 	:mWindow(nullptr)
@@ -171,8 +173,13 @@ void Game::ProcessInput()
 
 void Game::UpdateGame()
 {
-	//ゲーム時間の更新、制限など	
-	while (!SDL_TICKS_PASSED(SDL_GetTicks(), mTicksCount + 16));	//16ms経過までは待つ（フレーム制限）。約60fps
+	//ゲーム時間の更新、制限など
+	// フレームレート調整（62.5fps)
+	if (SDL_GetTicks() - mTicksCount < 16) {
+		int sleep = 16 - (SDL_GetTicks() - mTicksCount);
+		std::this_thread::sleep_for(std::chrono::milliseconds(sleep));    // sleepミリ秒処理を止める
+	}
+	//while (!SDL_TICKS_PASSED(SDL_GetTicks(), mTicksCount + 16));	//16ms経過までは待つ（フレーム制限）。※sleepしないのでCPU使用率が上がる。
 	float deltaTime = (SDL_GetTicks() - mTicksCount) / 1000.0f;		// deltaTimeを計算。単位は秒にする
 	if (deltaTime > 0.05f) { deltaTime = 0.05f; }		// 更新が遅すぎても最低のfpsを確保。50ms (20fps)
 	mTicksCount = SDL_GetTicks();		// 次のフレームのためtick countsを更新
